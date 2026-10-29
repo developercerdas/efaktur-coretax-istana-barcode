@@ -1,0 +1,27 @@
+{
+  "name": "efaktur-coretax-istana-barcode",
+  "version": "1.0.0",
+  "description": "Sistem Generator & Perhitungan e-Faktur Pajak Coretax DJP untuk CV. Istana Barcode Computer",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "efaktur",
+    "coretax",
+    "djp",
+    "pajak",
+    "ppn",
+    "istana-barcode",
+    "barcode-pos"
+  ],
+  "author": "CV. Istana Barcode Computer",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "cors": "^2.8.5",
+    "xmlbuilder2": "^3.1.1"
+  }
+}
