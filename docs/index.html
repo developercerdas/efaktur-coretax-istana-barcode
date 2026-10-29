@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e-Faktur Coretax | CV. Istana Barcode Computer</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header Bar -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo" id="brandLogoContainer">
+          <img id="headerLogoImg" src="" alt="Logo Toko" style="display:none; max-width: 46px; max-height: 46px; object-fit: contain; border-radius: 4px;">
+          <span class="icon" id="headerDefaultIcon">🏷️</span>
+        </div>
+        <div class="brand-info">
+          <h1>CV. ISTANA BARCODE COMPUTER</h1>
+          <p>Sistem Pembuatan Nota Penjualan & Generator e-Faktur Coretax DJP</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge badge-coretax">Coretax Ready (NPWP 16 & NITKU 22)</span>
+        <span class="badge badge-seller" id="sellerBadge">NPWP: 0328912340510000</span>
+      </div>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <nav class="nav-tabs">
+      <button class="tab-btn active" data-tab="create-nota">
+        <span class="tab-icon">📝</span> Buat Nota & e-Faktur
+      </button>
+      <button class="tab-btn" data-tab="master-customers">
+        <span class="tab-icon">👥</span> Master Lawan Transaksi
+      </button>
+      <button class="tab-btn" data-tab="master-products">
+        <span class="tab-icon">📦</span> Master Barang & Jasa
+      </button>
+      <button class="tab-btn" data-tab="invoice-list">
+        <span class="tab-icon">📋</span> Riwayat Nota & XML
+      </button>
+      <button class="tab-btn" data-tab="seller-settings">
+        <span class="tab-icon">⚙️</span> Profil & Rekening Toko
+      </button>
+      <button class="tab-btn" data-tab="coretax-guide">
+        <span class="tab-icon">📖</span> Panduan Coretax
+      </button>
+    </nav>
+
+    <!-- TAB 1: FORM NOTA PENJUALAN -->
+    <section id="tab-create-nota" class="tab-content active">
+      <form id="notaForm" onsubmit="event.preventDefault();">
+        <div class="grid-2-col">
+          <!-- Kolom Kiri: Informasi Nota & Penjual -->
+          <div class="card">
+            <div class="card-header">
+              <h2>1. Informasi Nota Penjualan</h2>
+            </div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="invoiceNo">Nomor Nota / Invoice</label>
+                  <input type="text" id="invoiceNo" required class="input-mono">
+                </div>
+                <div class="form-group flex-1">
+                  <label for="invoiceDate">Tanggal Transaksi</label>
+                  <input type="date" id="invoiceDate" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="kodeTransaksi">Kode Transaksi Coretax</label>
+                  <select id="kodeTransaksi">
+                    <option value="01">01 - Penyerahan BKP/JKP Umum</option>
+                    <option value="04" selected>04 - DPP Nilai Lain (Jasa/BKP Tertentu)</option>
+                    <option value="02">02 - Pemungut Bendahara Pemerintah</option>
+                    <option value="03">03 - Pemungut BUMN/BUMD</option>
+                  </select>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="paymentStatus">Status Pembayaran</label>
+                  <select id="paymentStatus">
+                    <option value="LUNAS">LUNAS (Transfer/Cash)</option>
+                    <option value="TEMPO" selected>TEMPO (Termin PT)</option>
+                    <option value="DP">Uang Muka (DP)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Pengaturan Pajak Coretax & Nilai Lain -->
+              <div class="tax-options-box">
+                <div class="form-row">
+                  <div class="form-group flex-1">
+                    <label for="ppnRate">Tarif PPN</label>
+                    <select id="ppnRate">
+                      <option value="12" selected>12% (Tarif Coretax)</option>
+                      <option value="11">11% (Tarif Standar)</option>
+                    </select>
+                  </div>
+                  <div class="form-group flex-2">
+                    <label>Skema DPP Nilai Lain</label>
+                    <div class="checkbox-row mt-1">
+                      <label class="checkbox-label">
+                        <input type="checkbox" id="chkDppNilaiLain" checked>
+                        <span>Gunakan DPP Nilai Lain</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-row mt-2" id="boxCustomDppLain">
+                  <div class="form-group flex-1">
+                    <label for="customDppNilaiLain">Nominal DPP Nilai Lain (Opsional/Custom)</label>
+                    <input type="number" id="customDppNilaiLain" placeholder="Kosongkan jika auto proporsi 11/12" class="input-mono">
+                    <small class="helper-text">Jika kosong, sistem otomatis menghitung <code>Subtotal × 11/12</code></small>
+                  </div>
+                </div>
+
+                <!-- Opsi Potongan PPh 23 (Dipotong oleh PT) -->
+                <div class="withholding-box mt-3">
+                  <div class="checkbox-row">
+                    <label class="checkbox-label">
+                      <input type="checkbox" id="chkPph23" checked>
+                      <span><strong>Potongan PPh Pasal 23 (Jasa) - Dipotong oleh PT Pembeli</strong></span>
+                    </label>
+                  </div>
+                  <div class="form-row mt-2" id="boxPph23Rate">
+                    <div class="form-group flex-1">
+                      <label for="pph23Rate">Tarif PPh Pasal 23</label>
+                      <div class="input-with-addon">
+                        <input type="number" id="pph23Rate" value="2" step="0.1" style="width: 100px;">
+                        <span class="addon">% dari Subtotal</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Kolom Kanan: Identitas Pembeli Sesuai Coretax -->
+          <div class="card">
+            <div class="card-header flex-between">
+              <div>
+                <h2>2. Data Lawan Transaksi (Pembeli PT / Rekanan)</h2>
+                <span class="pill-info">Identitas Pembeli & Coretax 16/22 Digit</span>
+              </div>
+              <div class="customer-quick-select">
+                <select id="quickCustomerSelect">
+                  <option value="">-- Pilih Lawan Transaksi Coretax --</option>
+                </select>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="tipeWp">Tipe Wajib Pajak</label>
+                  <select id="tipeWp">
+                    <option value="BADAN" selected>Badan Usaha (PT / CV / BUMN)</option>
+                    <option value="ORANG_PRIBADI">Orang Pribadi (Pemilik Toko / NIK)</option>
+                    <option value="KONSUMEN_AKHIR">Konsumen Akhir / Retail</option>
+                  </select>
+                </div>
+                <div class="form-group flex-2">
+                  <label for="customerName">Nama Perusahaan / PT / Pembeli <span class="req">*</span></label>
+                  <input type="text" id="customerName" value="PT. SUKUN WARTONO INDONESIA" placeholder="Contoh: PT. SUKUN WARTONO INDONESIA" required>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="customerPic">Nama Orang / PIC Pembeli (Up. / Perhatian)</label>
+                  <input type="text" id="customerPic" value="Chaulanna R. Wartono, SE., MA." placeholder="Contoh: Chaulanna R. Wartono, SE., MA. / Bp. Budi">
+                  <small class="helper-text">Tampil di faktur pada baris <code>Up. / Attn:</code> dan tanda terima pembeli.</small>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="customerJabatan">Jabatan / Bagian Pelanggan</label>
+                  <input type="text" id="customerJabatan" value="Manager HRD" placeholder="Contoh: Manager HRD / Bagian Keuangan / Kepala Gudang">
+                  <small class="helper-text">Tercetak di bawah tanda tangan tanda terima pembeli.</small>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="customerPhone">No. Telepon / WhatsApp</label>
+                  <input type="text" id="customerPhone" value="0291-432xxx" placeholder="08xx / 0291-xxxx">
+                </div>
+                <div class="form-group flex-1">
+                  <label for="customerEmail">Email Pembeli (Opsional)</label>
+                  <input type="email" id="customerEmail" value="hrd@sukun.co.id" placeholder="tax@perusahaan.com">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="npwpOrNik">NPWP 16 Digit / NIK <span class="req">*</span></label>
+                  <input type="text" id="npwpOrNik" value="0937832202506000" maxlength="16" class="input-mono" required>
+                  <small class="helper-text" id="npwpFeedback">Wajib 16 digit angka.</small>
+                </div>
+                <div class="form-group flex-1">
+                  <label for="nitku">NITKU (22 Digit)</label>
+                  <input type="text" id="nitku" value="0937832202506000000000" maxlength="22" class="input-mono">
+                  <small class="helper-text">Auto 22 digit sesuai standar Coretax.</small>
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group flex-1">
+                  <label for="customerAddress">Alamat Perusahaan / Toko Pembeli</label>
+                  <input type="text" id="customerAddress" value="Jl. Raya PR Sukun, 01, Gondosari Gebog, Kab. Kudus, Jawa Tengah 59354">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabel Item Barang & Jasa Barcode -->
+        <div class="card mt-4">
+          <div class="card-header flex-between">
+            <div>
+              <h2>3. Rincian Barang & Jasa (Hardware, Consumable & Service Barcode)</h2>
+              <p class="card-subtitle">Pilih dari katalog produk CV. Istana Barcode atau sesuaikan nilai transaksi</p>
+            </div>
+            <div class="catalog-quick-add">
+              <label for="quickCatalogSelect">Katalog Cepat:</label>
+              <select id="quickCatalogSelect">
+                <option value="">-- Pilih Produk CV. Istana Barcode --</option>
+              </select>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table-items" id="itemsTable">
+                <thead>
+                  <tr>
+                    <th width="4%">No</th>
+                    <th width="15%">Kode SKU</th>
+                    <th width="35%">Nama Barang / Jasa</th>
+                    <th width="8%">Qty</th>
+                    <th width="16%">Harga Satuan (Rp)</th>
+                    <th width="10%">Diskon (Rp)</th>
+                    <th width="15%">Subtotal (Rp)</th>
+                    <th width="5%">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="itemsTableBody">
+                  <!-- Baris item dinamis -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-actions flex-between">
+              <button type="button" class="btn btn-primary" id="btnOpenAddModal">
+                <span>➕</span> Tambah Transaksi (Tampilan Coretax DJP)
+              </button>
+              <button type="button" class="btn btn-secondary" id="btnAddItem">
+                <span>⚡</span> Tambah Cepat di Baris
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ringkasan Perhitungan Pajak & Pembayaran -->
+        <div class="grid-2-col mt-4">
+          <!-- Keterangan & Catatan Nota -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Catatan Rekonsiliasi & Instruksi Transfer</h2>
+            </div>
+            <div class="card-body">
+              <textarea id="invoiceNotes" rows="4">1. Pembayaran ditransfer ke rekening: Bank BCA 123-456-7890 a.n CV. Istana Barcode Computer.
+2. Bukti potong PPh Pasal 23 (e-Bupot Unifikasi) mohon diemail ke tax@istanabarcode.com.
+3. Garansi sistem barcode 1 tahun service.</textarea>
+              
+              <div class="terbilang-box mt-3">
+                <span class="terbilang-label">Terbilang (Nilai Transfer):</span>
+                <span class="terbilang-text" id="terbilangDisplay">Nol Rupiah</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RINGKASAN PEMBAYARAN PERSIS SEPERTI ANALOGI USER -->
+          <div class="card summary-card">
+            <div class="card-header flex-between">
+              <h2>RINGKASAN PEMBAYARAN</h2>
+              <span class="badge badge-coretax">Format Coretax Rekonsiliasi</span>
+            </div>
+            <div class="card-body summary-body">
+              <div class="summary-line">
+                <span>Subtotal (DPP):</span>
+                <strong id="summarySubtotalDpp">Rp 75.000.000,00</strong>
+              </div>
+              
+              <div class="summary-line" id="lineDppNilaiLain">
+                <span>DPP Nilai Lain (Dasar PPN):</span>
+                <strong id="summaryDppNilaiLain" class="text-primary">Rp 68.750.000,00</strong>
+              </div>
+
+              <div class="summary-line">
+                <span id="labelPpnText">PPN (12% dari DPP Nilai Lain):</span>
+                <strong id="summaryPpn" class="text-success">Rp 8.250.000,00</strong>
+              </div>
+
+              <div class="summary-line invoice-total-line">
+                <span>Total Tagihan:</span>
+                <strong id="summaryTotalTagihan">Rp 83.250.000,00</strong>
+              </div>
+
+              <div class="summary-line" id="linePph23">
+                <span id="labelPph23Text">Potongan PPh Pasal 23 (2% x Subtotal) - dipotong PT:</span>
+                <strong id="summaryPph23" class="text-danger">(Rp 1.500.000,00)</strong>
+              </div>
+
+              <div class="summary-line grand-total-line">
+                <span>TOTAL DITRANSFER / DIBAYARKAN:</span>
+                <strong id="summaryTotalDitransfer">Rp 81.750.000,00</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tombol Aksi Utama -->
+        <div class="action-bar mt-4">
+          <button type="button" class="btn btn-outline" id="btnResetForm">
+            <span>🔄</span> Buat Nota Baru
+          </button>
+          <div class="action-group">
+            <button type="button" class="btn btn-secondary" id="btnPrintPreview">
+              <span>🖨️</span> Cetak Nota Penjualan
+            </button>
+            <button type="button" class="btn btn-primary" id="btnSaveInvoice">
+              <span>💾</span> Simpan Nota & Faktur
+            </button>
+            <button type="button" class="btn btn-success" id="btnDownloadXml" disabled>
+              <span>📥</span> Download XML Coretax
+            </button>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- TAB MASTER LAWAN TRANSAKSI (CUSTOMERS) -->
+    <section id="tab-master-customers" class="tab-content">
+      <div class="card">
+        <div class="card-header flex-between">
+          <div>
+            <h2>Master Lawan Transaksi (Pelanggan PT, CV & Toko Coretax)</h2>
+            <p class="card-subtitle">Database Wajib Pajak pembeli dengan NPWP 16 Digit & NITKU 22 Digit</p>
+          </div>
+          <button type="button" class="btn btn-primary" id="btnOpenAddCustomerModal">
+            <span>➕</span> Tambah Rekanan Baru
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table-list" id="customerTable">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tipe WP</th>
+                  <th>Nama Perusahaan / Rekanan</th>
+                  <th>NPWP 16 Digit / NIK</th>
+                  <th>NITKU (22 Digit)</th>
+                  <th>Alamat & Telepon</th>
+                  <th>Kode Trx</th>
+                  <th>Pemotong PPh 23</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="customerTableBody">
+                <!-- Data di-load via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB MASTER BARANG & JASA (PRODUCTS & SERVICES) -->
+    <section id="tab-master-products" class="tab-content">
+      <div class="card">
+        <div class="card-header flex-between">
+          <div>
+            <h2>Master Barang & Jasa (Hardware, Consumable & Jasa Software POS)</h2>
+            <p class="card-subtitle">Katalog komoditas BKP/JKP sesuai klasifikasi Coretax DJP</p>
+          </div>
+          <div class="header-actions">
+            <button type="button" class="btn btn-primary" id="btnOpenAddProductModal">
+              <span>➕</span> Tambah Barang / Jasa Baru
+            </button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table-list" id="productTable">
+              <thead>
+                <tr>
+                  <th>Kode SKU</th>
+                  <th>Tipe</th>
+                  <th>Kode Coretax</th>
+                  <th>Nama Barang / Jasa</th>
+                  <th>Satuan</th>
+                  <th class="text-right">Harga Satuan</th>
+                  <th>DPP Nilai Lain</th>
+                  <th>Objek PPh 23</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="productTableBody">
+                <!-- Data di-load via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: RIWAYAT NOTA & EXPORT XML -->
+    <section id="tab-invoice-list" class="tab-content">
+      <div class="card">
+        <div class="card-header flex-between">
+          <div>
+            <h2>Daftar Riwayat Nota Penjualan & e-Faktur Coretax</h2>
+            <p class="card-subtitle">Semua nota tersimpan dan siap diekspor ke file XML Coretax DJP</p>
+          </div>
+          <button type="button" class="btn btn-sm btn-secondary" id="btnRefreshList">
+            <span>🔄</span> Refresh Data
+          </button>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table-list" id="invoiceListTable">
+              <thead>
+                <tr>
+                  <th>No. Nota</th>
+                  <th>Tanggal</th>
+                  <th>Nama PT Pembeli</th>
+                  <th>Subtotal (DPP)</th>
+                  <th>PPN</th>
+                  <th>PPh 23</th>
+                  <th>Total Ditransfer</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="invoiceListBody">
+                <!-- Data di-load via JavaScript -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB PENGATURAN PROFIL & REKENING TOKO -->
+    <section id="tab-seller-settings" class="tab-content">
+      <div class="card" style="max-width: 850px; margin: 0 auto;">
+        <div class="card-header flex-between">
+          <div>
+            <h2>Pengaturan Profil Perusahaan, Rekening & Catatan Default</h2>
+            <p class="card-subtitle">Ubah nomor rekening bank, email bukti potong PPh 23, dan data toko CV. Istana Barcode Computer</p>
+          </div>
+          <span class="badge badge-coretax">Identitas Penjual</span>
+        </div>
+        <div class="card-body">
+          <form id="formSellerSettings" onsubmit="event.preventDefault();">
+            <!-- Grid Upload Logo & Stempel Section -->
+            <div class="grid-2-col mb-4">
+              <!-- Upload Logo Section -->
+              <div class="logo-upload-card">
+                <label style="display: block; font-weight: 700; color: var(--primary); margin-bottom: 8px;">1. Logo Resmi Toko (Header Nota)</label>
+                <div class="logo-upload-box">
+                  <div class="logo-preview-wrapper" id="logoPreviewBox">
+                    <img id="logoPreviewImg" src="" alt="Preview Logo" style="display:none; max-width: 140px; max-height: 70px; object-fit: contain;">
+                    <span id="logoPlaceholder" class="logo-placeholder">Belum Ada Logo<br><small style="color:#94a3b8;">Format PNG / JPG</small></span>
+                  </div>
+                  <div class="logo-upload-buttons">
+                    <input type="file" id="logoFileInput" accept="image/*" style="display:none;">
+                    <button type="button" class="btn btn-secondary" id="btnBrowseLogo">
+                      <span>📁</span> Upload Logo
+                    </button>
+                    <button type="button" class="btn btn-outline text-danger" id="btnRemoveLogo" style="display:none;">
+                      <span>🗑️</span> Hapus
+                    </button>
+                    <small class="helper-text" style="display: block; margin-top: 4px;">Tampil di pojok kiri atas nota.</small>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Upload Stempel & Tanda Tangan Section -->
+              <div class="logo-upload-card">
+                <label style="display: block; font-weight: 700; color: var(--primary); margin-bottom: 8px;">2. Stempel & Tanda Tangan Toko</label>
+                <div class="logo-upload-box">
+                  <div class="logo-preview-wrapper" id="stempelPreviewBox">
+                    <img id="stempelPreviewImg" src="" alt="Preview Stempel" style="display:none; max-width: 140px; max-height: 70px; object-fit: contain;">
+                    <span id="stempelPlaceholder" class="logo-placeholder">Belum Ada Stempel<br><small style="color:#94a3b8;">Format PNG Transparan</small></span>
+                  </div>
+                  <div class="logo-upload-buttons">
+                    <input type="file" id="stempelFileInput" accept="image/*" style="display:none;">
+                    <button type="button" class="btn btn-secondary" id="btnBrowseStempel">
+                      <span>📁</span> Upload Stempel
+                    </button>
+                    <button type="button" class="btn btn-outline text-danger" id="btnRemoveStempel" style="display:none;">
+                      <span>🗑️</span> Hapus
+                    </button>
+                    <small class="helper-text" style="display: block; margin-top: 4px;">Tampil di kolom tanda tangan nota.</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <h3 style="font-size: 14px; margin-bottom: 12px; color: var(--primary);">1. Data Identitas Wajib Pajak Toko</h3>
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="sellerName">Nama Perusahaan Penjual</label>
+                <input type="text" id="sellerName" value="CV. ISTANA BARCODE COMPUTER" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="sellerPhone">No. Telepon / WhatsApp Toko</label>
+                <input type="text" id="sellerPhone" value="085 640 433 307">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="sellerTagline">Keterangan Spesialis / Slogan Header (Tampil di Bawah Nama Toko)</label>
+                <input type="text" id="sellerTagline" value="Official IT Solution & POS Barcode Hardware System" placeholder="Contoh: Official IT Solution & POS Barcode Hardware System">
+                <small class="helper-text">Teks ini tampil persis di baris kedua kop nota penjualan.</small>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="sellerNpwp16">NPWP 16 Digit Penjual (Coretax)</label>
+                <input type="text" id="sellerNpwp16" class="input-mono" maxlength="16" value="0328912340510000" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="sellerNitku">NITKU 22 Digit Penjual</label>
+                <input type="text" id="sellerNitku" class="input-mono" maxlength="22" value="0328912340510000000000" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="sellerAddress">Alamat Lengkap Toko</label>
+                <input type="text" id="sellerAddress" value="Ruko Istana Barcode, Jl. Otomasi Kasir No. 88, Indonesia">
+              </div>
+            </div>
+
+            <hr class="print-divider" style="margin: 20px 0;">
+
+            <h3 style="font-size: 14px; margin-bottom: 12px; color: var(--primary);">2. Pejabat Penandatangan Nota</h3>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="sellerManagerName">Nama Pejabat / Manager</label>
+                <input type="text" id="sellerManagerName" value="Djohan Hutagalung, S.Kom." placeholder="Nama penandatangan">
+              </div>
+              <div class="form-group flex-1">
+                <label for="sellerManagerTitle">Jabatan Pejabat</label>
+                <input type="text" id="sellerManagerTitle" value="Manager CV. Istana Barcode Computer" placeholder="Jabatan">
+              </div>
+            </div>
+
+            <hr class="print-divider" style="margin: 20px 0;">
+
+            <h3 style="font-size: 14px; margin-bottom: 12px; color: var(--primary);">3. Instruksi Transfer & Rekening Bank (Tampil di Nota)</h3>
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="sellerBankName">Nama Bank Pembayaran</label>
+                <input type="text" id="sellerBankName" value="Bank BCA" placeholder="Contoh: Bank BCA / Bank Mandiri / BRI">
+              </div>
+              <div class="form-group flex-1">
+                <label for="sellerBankAccount">Nomor Rekening Bank</label>
+                <input type="text" id="sellerBankAccount" class="input-mono" value="123-456-7890" placeholder="Nomor rekening">
+              </div>
+              <div class="form-group flex-1">
+                <label for="sellerBankAccountName">Atas Nama Rekening</label>
+                <input type="text" id="sellerBankAccountName" value="CV. Istana Barcode Computer">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="sellerEmailTax">Email Khusus Bukti Potong PPh 23 (e-Bupot)</label>
+                <input type="text" id="sellerEmailTax" value="tax@istanabarcode.com" placeholder="Email bagian pajak">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="sellerDefaultNotes">Teks Catatan & Instruksi Transfer Bawaan (Default pada Setiap Nota Baru)</label>
+                <textarea id="sellerDefaultNotes" rows="5" placeholder="Teks instruksi transfer rekening bank..."></textarea>
+                <small class="helper-text">Teks ini akan otomatis muncul pada form nota dan dapat diedit per transaksi.</small>
+              </div>
+            </div>
+
+            <div class="action-bar mt-4" style="padding: 12px 16px;">
+              <span id="sellerSaveFeedback" style="font-size: 13px; color: var(--success); font-weight: 600;"></span>
+              <button type="button" class="btn btn-primary" id="btnSaveSellerSettings">
+                <span>💾</span> Simpan Profil & Rekening Toko
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: PANDUAN CORETAX -->
+    <section id="tab-coretax-guide" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <h2>Panduan & Ketentuan Perhitungan Pajak Coretax DJP</h2>
+          <span class="pill-info">Implementasi CV. Istana Barcode Computer</span>
+        </div>
+        <div class="card-body guide-content">
+          <div class="guide-grid">
+            <div class="guide-box">
+              <h3>1. Subtotal & DPP Nilai Lain</h3>
+              <p>Pada transaksi tertentu (Kode Transaksi 04), PPN 12% dihitung dari <strong>DPP Nilai Lain</strong> (misal: rasio 11/12 atau proporsi nominal tertentu), sehingga menghasilkan nilai PPN yang presisi sesuai ketentuan.</p>
+            </div>
+            <div class="guide-box">
+              <h3>2. Potongan PPh Pasal 23 (2%)</h3>
+              <p>Untuk transaksi pengadaan jasa atau instalasi/maintenance kepada PT rekanan, PT pemotong akan memotong PPh 23 sebesar <strong>2% dari Subtotal (DPP Dasar)</strong>.</p>
+            </div>
+            <div class="guide-box">
+              <h3>3. Rekonsiliasi Tagihan vs Ditransfer</h3>
+              <p><code>Total Tagihan = Subtotal + PPN</code><br>
+              <code>Total Ditransfer = Total Tagihan - Potongan PPh 23</code><br>
+              Selisih transfer ini akan ditutup dengan Bukti Potong (Bupot) PPh 23 dari pihak PT.</p>
+            </div>
+            <div class="guide-box">
+              <h3>4. Skema XML Coretax DJP</h3>
+              <p>Format XML mencantumkan kode transaksi, identitas NPWP 16/NITKU 22, DPP Nilai Lain, dan PPN secara terpisah untuk validasi lolos impor di Coretax DJP.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODAL ADD TRANSACTION PERSIS TAMPILAN CORETAX DJP -->
+    <div class="modal-backdrop" id="addTransactionModal">
+      <div class="modal-content coretax-modal-content">
+        <div class="modal-header">
+          <h3>Add Transaction</h3>
+          <button type="button" class="close-btn" id="btnCloseAddModal">&times;</button>
+        </div>
+        <div class="modal-body coretax-modal-body">
+          <div class="coretax-grid-2">
+            <!-- Kolom Kiri: Detail Barang / Jasa -->
+            <div class="coretax-left-col">
+              <!-- Tipe: Barang / Jasa -->
+              <div class="form-group mb-3">
+                <label class="coretax-label">Tipe</label>
+                <div class="coretax-radio-row">
+                  <label class="coretax-radio">
+                    <input type="radio" name="modalTipe" value="Barang">
+                    <span>Barang</span>
+                  </label>
+                  <label class="coretax-radio">
+                    <input type="radio" name="modalTipe" value="Jasa" checked>
+                    <span>Jasa</span>
+                  </label>
+                  <button type="button" class="btn-coretax-unduh" title="Unduh Kode Klasifikasi Coretax">
+                    Unduh Kode 📥
+                  </button>
+                </div>
+              </div>
+
+              <!-- Kode -->
+              <div class="form-group mb-3">
+                <label class="coretax-label" for="modalKode">Kode</label>
+                <select id="modalKode" class="coretax-select">
+                  <option value="000000 - Jasa" selected>000000 - Jasa</option>
+                  <option value="83141001 - Jasa Software & Instalasi POS">83141001 - Jasa Software & Instalasi POS</option>
+                  <option value="87151001 - Jasa Maintenance Perangkat Barcode">87151001 - Jasa Maintenance Perangkat Barcode</option>
+                  <option value="45281001 - Barcode Scanner">45281001 - Barcode Scanner</option>
+                  <option value="45262002 - Printer Label Thermal">45262002 - Printer Label Thermal</option>
+                  <option value="38912001 - Ribbon Barcode">38912001 - Ribbon Barcode</option>
+                </select>
+              </div>
+
+              <!-- Nama * -->
+              <div class="form-group mb-3">
+                <label class="coretax-label" for="modalNama">Nama *</label>
+                <input type="text" id="modalNama" class="coretax-input" value="Jasa Pembuatan Aplikasi Sistem Informasi Manajemen Payroll" required>
+              </div>
+
+              <!-- Satuan * -->
+              <div class="form-group mb-3">
+                <label class="coretax-label" for="modalSatuan">Satuan *</label>
+                <select id="modalSatuan" class="coretax-select">
+                  <option value="Lainnya" selected>Lainnya</option>
+                  <option value="Paket">Paket</option>
+                  <option value="Unit">Unit</option>
+                  <option value="Roll">Roll</option>
+                  <option value="Bulan">Bulan</option>
+                  <option value="Jam">Jam</option>
+                </select>
+              </div>
+
+              <!-- Harga Satuan -->
+              <div class="form-group mb-3">
+                <label class="coretax-label" for="modalHargaSatuan">Harga Satuan</label>
+                <input type="text" id="modalHargaSatuan" class="coretax-input text-right input-mono" value="75.000.000,00">
+              </div>
+
+              <!-- KUANTITAS -->
+              <div class="form-group mb-3">
+                <label class="coretax-label" for="modalQty">KUANTITAS</label>
+                <input type="text" id="modalQty" class="coretax-input text-right input-mono" value="1,00">
+              </div>
+
+              <!-- Total Harga -->
+              <div class="form-group mb-3">
+                <label class="coretax-label">Total Harga</label>
+                <input type="text" id="modalTotalHarga" class="coretax-input text-right input-mono readonly-input" value="75.000.000,00" readonly>
+              </div>
+
+              <!-- Potongan harga -->
+              <div class="form-group mb-3">
+                <label class="coretax-label" for="modalPotongan">Potongan harga</label>
+                <input type="text" id="modalPotongan" class="coretax-input text-right input-mono" value="0,00">
+              </div>
+            </div>
+
+            <!-- Kolom Kanan: PPN dan PPnBM -->
+            <div class="coretax-right-col">
+              <h4 class="coretax-section-title">PPN dan PPnBM</h4>
+
+              <!-- DPP -->
+              <div class="form-group mb-3">
+                <label class="coretax-label">DPP</label>
+                <input type="text" id="modalDpp" class="coretax-input text-right input-mono readonly-input" value="75.000.000,00" readonly>
+              </div>
+
+              <!-- DPP Nilai Lain/DPP -->
+              <div class="form-group mb-3">
+                <div class="coretax-checkbox-row mb-1">
+                  <input type="checkbox" id="modalChkDppNilaiLain" checked>
+                  <label for="modalChkDppNilaiLain" class="coretax-checkbox-label">DPP Nilai Lain/DPP</label>
+                </div>
+                <input type="text" id="modalDppNilaiLainVal" class="coretax-input text-right input-mono" value="68.750.000,00">
+              </div>
+
+              <!-- Tarif PPN -->
+              <div class="form-group mb-3">
+                <label class="coretax-label" for="modalTarifPpn">Tarif PPN</label>
+                <select id="modalTarifPpn" class="coretax-select">
+                  <option value="12" selected>12%</option>
+                  <option value="11">11%</option>
+                  <option value="0">0%</option>
+                </select>
+              </div>
+
+              <!-- PPN -->
+              <div class="form-group mb-3">
+                <label class="coretax-label">PPN</label>
+                <input type="text" id="modalPpnVal" class="coretax-input text-right input-mono readonly-input" value="8.250.000,00" readonly>
+              </div>
+
+              <!-- Tarif PPnBM (%) -->
+              <div class="form-group mb-3">
+                <label class="coretax-label" for="modalTarifPpnBm">Tarif PPnBM (%)</label>
+                <input type="text" id="modalTarifPpnBm" class="coretax-input text-right input-mono" value="0,00">
+              </div>
+
+              <!-- PPnBM -->
+              <div class="form-group mb-3">
+                <label class="coretax-label">PPnBM</label>
+                <input type="text" id="modalPpnBmVal" class="coretax-input text-right input-mono readonly-input" value="0,00" readonly>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer coretax-modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnBatalAddModal">Batal</button>
+          <button type="button" class="btn btn-primary" id="btnSimpanAddModal">Simpan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL TAMBAH / EDIT MASTER LAWAN TRANSAKSI -->
+    <div class="modal-backdrop" id="customerModal">
+      <div class="modal-content" style="max-width: 650px;">
+        <div class="modal-header">
+          <h3 id="custModalTitle">Tambah Master Lawan Transaksi Coretax</h3>
+          <button type="button" class="close-btn" id="btnCloseCustomerModal">&times;</button>
+        </div>
+        <div class="modal-body" style="background: white;">
+          <form id="formCustomerMaster" onsubmit="event.preventDefault();">
+            <input type="hidden" id="custMasterId">
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="custMasterTipe">Tipe Wajib Pajak</label>
+                <select id="custMasterTipe">
+                  <option value="BADAN">Badan Usaha (PT / CV / BUMN)</option>
+                  <option value="ORANG_PRIBADI">Orang Pribadi (Toko / NIK)</option>
+                </select>
+              </div>
+              <div class="form-group flex-2">
+                <label for="custMasterNama">Nama Perusahaan / Rekanan *</label>
+                <input type="text" id="custMasterNama" placeholder="Contoh: PT. Sumber Sukses Retail" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="custMasterPic">Nama Orang / PIC Pembeli (Up. / Perhatian)</label>
+                <input type="text" id="custMasterPic" placeholder="Contoh: Chaulanna R. Wartono, SE., MA. / Bp. Budi">
+              </div>
+              <div class="form-group flex-1">
+                <label for="custMasterJabatan">Jabatan / Bagian PIC</label>
+                <input type="text" id="custMasterJabatan" placeholder="Contoh: Manager HRD / Finance / Kepala Gudang">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="custMasterNpwp">NPWP 16 Digit / NIK *</label>
+                <input type="text" id="custMasterNpwp" maxlength="16" class="input-mono" placeholder="16 Digit Angka" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="custMasterNitku">NITKU (22 Digit)</label>
+                <input type="text" id="custMasterNitku" maxlength="22" class="input-mono" placeholder="Auto 22 digit jika kosong">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="custMasterAlamat">Alamat Lengkap</label>
+                <input type="text" id="custMasterAlamat" placeholder="Jl. Raya Bisnis No. 123">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="custMasterPhone">No. Telepon / WhatsApp</label>
+                <input type="text" id="custMasterPhone" placeholder="0812-xxxx-xxxx">
+              </div>
+              <div class="form-group flex-1">
+                <label for="custMasterEmail">Email Notifikasi Faktur</label>
+                <input type="text" id="custMasterEmail" placeholder="tax@perusahaan.com">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="custMasterKodeTrx">Default Kode Transaksi Coretax</label>
+                <select id="custMasterKodeTrx">
+                  <option value="01">01 - Penyerahan BKP/JKP Umum</option>
+                  <option value="04">04 - DPP Nilai Lain</option>
+                  <option value="02">02 - Pemungut Pemerintah</option>
+                  <option value="03">03 - Pemungut BUMN</option>
+                </select>
+              </div>
+              <div class="form-group flex-1" style="justify-content: center;">
+                <label class="checkbox-label" style="margin-top: 18px;">
+                  <input type="checkbox" id="custMasterPph23" checked>
+                  <span>Pemotong PPh 23 (Rekanan PT)</span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnBatalCustomerModal">Batal</button>
+          <button type="button" class="btn btn-primary" id="btnSimpanCustomerModal">Simpan Rekanan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL TAMBAH / EDIT MASTER BARANG & JASA -->
+    <div class="modal-backdrop" id="productModal">
+      <div class="modal-content" style="max-width: 650px;">
+        <div class="modal-header">
+          <h3 id="prodModalTitle">Tambah Master Barang / Jasa Coretax</h3>
+          <button type="button" class="close-btn" id="btnCloseProductModal">&times;</button>
+        </div>
+        <div class="modal-body" style="background: white;">
+          <form id="formProductMaster" onsubmit="event.preventDefault();">
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="prodMasterTipe">Tipe Komoditas</label>
+                <select id="prodMasterTipe">
+                  <option value="Barang">Barang (Hardware / Consumable)</option>
+                  <option value="Jasa" selected>Jasa (Software / Setting / Service)</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label for="prodMasterSku">Kode SKU *</label>
+                <input type="text" id="prodMasterSku" class="input-mono" placeholder="Contoh: SRV-APP-01" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-2">
+                <label for="prodMasterNama">Nama Barang / Jasa *</label>
+                <input type="text" id="prodMasterNama" placeholder="Contoh: Jasa Pembuatan Modul Kasir" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="prodMasterKodeCoretax">Kode Coretax (KBKI)</label>
+                <input type="text" id="prodMasterKodeCoretax" placeholder="000000 - Jasa" value="000000 - Jasa">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="prodMasterSatuan">Satuan</label>
+                <select id="prodMasterSatuan">
+                  <option value="Lainnya">Lainnya</option>
+                  <option value="Paket">Paket</option>
+                  <option value="Unit">Unit</option>
+                  <option value="Roll">Roll</option>
+                  <option value="Bulan">Bulan</option>
+                  <option value="Pcs">Pcs</option>
+                </select>
+              </div>
+              <div class="form-group flex-1">
+                <label for="prodMasterHarga">Harga Satuan (Rp) *</label>
+                <input type="number" id="prodMasterHarga" min="0" step="1000" placeholder="75000000" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label class="checkbox-label" style="margin-top: 10px;">
+                  <input type="checkbox" id="prodMasterDppLain">
+                  <span>Skema DPP Nilai Lain (Proporsi 11/12)</span>
+                </label>
+              </div>
+              <div class="form-group flex-1">
+                <label class="checkbox-label" style="margin-top: 10px;">
+                  <input type="checkbox" id="prodMasterPph23" checked>
+                  <span>Objek Pemotongan PPh 23 (2%)</span>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnBatalProductModal">Batal</button>
+          <button type="button" class="btn btn-primary" id="btnSimpanProductModal">Simpan Barang/Jasa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL PRINT NOTA RESMI -->
+    <div class="modal-backdrop" id="printModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Pratinjau Nota Penjualan & Faktur</h3>
+          <button type="button" class="close-btn" id="btnCloseModal">&times;</button>
+        </div>
+        <div class="modal-body printable-area" id="printContent">
+          <!-- Desain Nota Cetak Rapi & Elegan -->
+          <div class="invoice-paper" id="invoicePaperPrint">
+            <!-- Header Nota -->
+            <div class="invoice-header-print">
+              <div class="company-brand-wrapper">
+                <div id="printLogoBox" class="print-logo-box" style="display:none;">
+                  <img id="printLogoImg" src="" alt="Logo Toko" style="max-height: 60px; max-width: 140px; object-fit: contain;">
+                </div>
+                <div class="company-logo-print">
+                  <h2 id="printCompanyTitle">CV. ISTANA BARCODE COMPUTER</h2>
+                  <p class="company-sub" id="printCompanySub">Official IT Solution & POS Barcode Hardware System</p>
+                  <p class="company-addr" id="printCompanyAddr">Jl. KH. Moh. Arwani No. 7 Kota Kudus | Telp/WA: 085 640 433 307</p>
+                  <p class="company-tax" id="printCompanyTax">NPWP (16): <span id="printCompanyNpwp">0328912340510000</span> | NITKU: <span id="printCompanyNitku">0328912340510000000000</span></p>
+                </div>
+              </div>
+              <div class="invoice-title-print">
+                <h1>NOTA PENJUALAN</h1>
+                <p class="doc-badge">DOKUMEN TRANSAKSI & FAKTUR</p>
+                <div class="meta-card">
+                  <div class="meta-row"><span class="m-label">No. Nota</span><span class="m-sep">:</span><strong id="printInvNo" class="input-mono m-val">-</strong></div>
+                  <div class="meta-row"><span class="m-label">Tanggal</span><span class="m-sep">:</span><span id="printInvDate" class="m-val">-</span></div>
+                  <div class="meta-row"><span class="m-label">Status</span><span class="m-sep">:</span><span id="printInvStatus" class="status-pill m-val">-</span></div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="print-divider">
+
+            <!-- Data Lawan Transaksi (Pembeli) Rapi 2 Kolom -->
+            <div class="customer-info-card">
+              <div class="cust-info-col-left">
+                <div class="cust-data-row">
+                  <span class="c-label">Kepada Yth.</span>
+                  <span class="c-sep">:</span>
+                  <strong id="printCustName" class="c-val text-primary">-</strong>
+                </div>
+                <div class="cust-data-row" id="printCustPicRow">
+                  <span class="c-label">Up. / Attn</span>
+                  <span class="c-sep">:</span>
+                  <strong id="printCustPic" class="c-val">-</strong>
+                </div>
+                <div class="cust-data-row">
+                  <span class="c-label">Alamat</span>
+                  <span class="c-sep">:</span>
+                  <span id="printCustAddress" class="c-val">-</span>
+                </div>
+              </div>
+              <div class="cust-info-col-right">
+                <div class="cust-data-row">
+                  <span class="c-label">NPWP (16) / NIK</span>
+                  <span class="c-sep">:</span>
+                  <strong id="printCustNpwp" class="input-mono c-val">-</strong>
+                </div>
+                <div class="cust-data-row">
+                  <span class="c-label">NITKU (22 Digit)</span>
+                  <span class="c-sep">:</span>
+                  <span id="printCustNitku" class="input-mono c-val">-</span>
+                </div>
+                <div class="cust-data-row" id="printCustPhoneRow">
+                  <span class="c-label">Telp / Kontak</span>
+                  <span class="c-sep">:</span>
+                  <span id="printCustPhone" class="c-val">-</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabel Rincian Barang & Jasa Barcode -->
+            <div class="print-table-wrapper mt-3">
+              <table class="print-items-table">
+                <thead>
+                  <tr>
+                    <th width="5%" class="text-center">No</th>
+                    <th width="18%">Kode SKU</th>
+                    <th width="37%">Nama Barang / Jasa Barcode</th>
+                    <th width="8%" class="text-center">Qty</th>
+                    <th width="16%" class="text-right">Harga Satuan</th>
+                    <th width="16%" class="text-right">Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody id="printItemsBody">
+                  <!-- Baris nota cetak -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- RINGKASAN PEMBAYARAN PERSIS SEPERTI ANALOGI USER (TIDAK TERPOTONG) -->
+            <div class="print-summary-grid mt-3">
+              <div class="print-left-block">
+                <div class="print-notes-box">
+                  <strong class="notes-header">Catatan & Instruksi Pembayaran:</strong>
+                  <p id="printNotes" class="notes-body">-</p>
+                </div>
+                <div class="print-terbilang-box mt-2">
+                  <span class="terbilang-title">TERBILANG (NILAI TRANSFER):</span>
+                  <p id="printTerbilang" class="terbilang-content">-</p>
+                </div>
+              </div>
+
+              <div class="print-right-block">
+                <table class="totals-table">
+                  <tr>
+                    <td class="tot-label">Subtotal (DPP)</td>
+                    <td class="tot-sep">:</td>
+                    <td class="text-right tot-val" id="printSubtotalDpp">Rp 75.000.000,00</td>
+                  </tr>
+                  <tr id="printRowDppLain">
+                    <td class="tot-label text-muted">DPP Nilai Lain</td>
+                    <td class="tot-sep">:</td>
+                    <td class="text-right tot-val text-muted" id="printDppLain">Rp 68.750.000,00</td>
+                  </tr>
+                  <tr>
+                    <td class="tot-label" id="printLabelPpn">PPN (12% dari DPP Nilai Lain)</td>
+                    <td class="tot-sep">:</td>
+                    <td class="text-right tot-val text-success" id="printPpn">Rp 8.250.000,00</td>
+                  </tr>
+                  <tr class="tagihan-total-row">
+                    <td class="tot-label"><strong>Total Tagihan</strong></td>
+                    <td class="tot-sep">:</td>
+                    <td class="text-right tot-val"><strong id="printTotalTagihan">Rp 83.250.000,00</strong></td>
+                  </tr>
+                  <tr id="printRowPph23" class="pph-row">
+                    <td class="tot-label" id="printLabelPph23">Potongan PPh Pasal 23 (2% x Subtotal) - dipotong PT</td>
+                    <td class="tot-sep">:</td>
+                    <td class="text-right tot-val text-danger" id="printPph23">(Rp 1.500.000,00)</td>
+                  </tr>
+                  <tr class="grand-total-row">
+                    <td class="tot-label"><strong>TOTAL DITRANSFER / DIBAYARKAN</strong></td>
+                    <td class="tot-sep">:</td>
+                    <td class="text-right tot-val"><strong id="printTotalDitransfer">Rp 81.750.000,00</strong></td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+
+            <!-- Tanda Tangan -->
+            <div class="print-signatures mt-4">
+              <div class="sig-box">
+                <p class="sig-title">Tanda Terima / Mengetahui,</p>
+                <div class="sig-space"></div>
+                <p class="sig-name" id="printSigCustomerName">( .................................................... )</p>
+                <small class="sig-sub" id="printSigCustomerSub">Pelanggan / Rekanan</small>
+              </div>
+              <div class="sig-box sig-box-seller">
+                <p class="sig-title">Hormat Kami,</p>
+                <p class="sig-company"><strong id="printSigCompany">CV. ISTANA BARCODE COMPUTER</strong></p>
+                <div class="sig-space sig-space-seller">
+                  <img id="printStempelImg" src="" alt="Stempel & Tanda Tangan" style="display:none; max-height: 80px; max-width: 170px; object-fit: contain;">
+                </div>
+                <p class="sig-name" id="printSigManagerName">( Djohan Hutagalung, S.Kom. )</p>
+                <small class="sig-sub" id="printSigManagerTitle">Manager CV. Istana Barcode Computer</small>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btnCancelModal">Tutup</button>
+          <button type="button" class="btn btn-primary" onclick="window.print();">
+            <span>🖨️</span> Cetak Sekarang (Print / PDF)
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
