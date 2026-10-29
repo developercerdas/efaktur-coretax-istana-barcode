@@ -4,6 +4,334 @@
  * CV. Istana Barcode Computer
  */
 
+// ========================================================
+// STATIC FALLBACK & GITHUB PAGES DUAL-MODE SUPPORT
+// ========================================================
+const DEFAULT_STATIC_SELLER = {
+  npwp16: '0868643701506000',
+  nitku: '-',
+  name: 'CV. ISTANA BARCODE COMPUTER',
+  address: 'Jl. KH. Moh. Arwani No. 7 Kota Kudus',
+  email: 'istanabarcodecomputer@gmail.com',
+  phone: '085 640 433 307',
+  bankName: 'Bank BCA',
+  bankAccount: '0310588628',
+  bankAccountName: 'Djohan Hutagalung',
+  tagline: 'Official IT Solution & POS Barcode Hardware System',
+  managerName: 'Djohan Hutagalung, S.Kom.',
+  managerTitle: 'Manager CV. Istana Barcode Computer',
+  logoUrl: 'assets/logo_ibc.png',
+  stempelUrl: 'assets/stempel_ibc.png',
+  defaultNotes: '1. Pembayaran ditransfer ke rekening: Bank BCA 0310588628 a.n Djohan Hutagalung.\n2. Bukti potong PPh Pasal 23 (e-Bupot Unifikasi) mohon diemail ke istanabarcodecomputer@gmail.com.\n3. Garansi sistem barcode 1 tahun service.'
+};
+
+const DEFAULT_STATIC_CUSTOMERS = [
+  {
+    id: 'CUST-SUKUN-01',
+    tipeWp: 'BADAN',
+    name: 'PT. SUKUN WARTONO INDONESIA',
+    pic: 'Chaulanna R. Wartono, SE., MA.',
+    jabatan: 'Manager HRD',
+    npwpOrNik: '0937832202506000',
+    nitku: '0937832202506000000000',
+    address: 'Jl. Raya PR Sukun, 01, Gondosari Gebog, Kab. Kudus, Jawa Tengah 59354',
+    email: 'hrd@sukun.co.id',
+    phone: '0291-432xxx',
+    defaultKodeTransaksi: '04',
+    isPemotongPph23: true
+  },
+  {
+    id: 'CUST-001',
+    tipeWp: 'BADAN',
+    name: 'PT. SUMBER ALFARIA RETAIL TBK',
+    pic: 'Bp. Budi Santoso',
+    jabatan: 'Finance / AP',
+    npwpOrNik: '0134567890123000',
+    nitku: '0134567890123000000001',
+    address: 'Jl. MH Thamrin No. 9, Cikokol, Tangerang, Banten 15117',
+    email: 'tax.ap@alfamart.co.id',
+    phone: '021-55755999',
+    defaultKodeTransaksi: '01',
+    isPemotongPph23: true
+  },
+  {
+    id: 'CUST-002',
+    tipeWp: 'BADAN',
+    name: 'PT. MULTI RETAIL LOGISTIK INDONESIA',
+    pic: 'Ibu Ratna',
+    jabatan: 'Purchasing Manager',
+    npwpOrNik: '0245678901234000',
+    nitku: '0245678901234000000000',
+    address: 'Kawasan Industri Pulogadung Blok B No. 45, Cakung, Jakarta Timur 13930',
+    email: 'finance.tax@multiretail.co.id',
+    phone: '021-46801234',
+    defaultKodeTransaksi: '04',
+    isPemotongPph23: true
+  },
+  {
+    id: 'CUST-004',
+    tipeWp: 'ORANG_PRIBADI',
+    name: 'HENDRO WIJAYA (TOKO KASIR SENTOSA)',
+    pic: 'Hendro Wijaya',
+    jabatan: 'Pemilik Toko',
+    npwpOrNik: '3174051208850003',
+    nitku: '3174051208850003000000',
+    address: 'Pusat Grosir Mangga Dua Lt. 2 Blok B No. 15, Jakarta Pusat',
+    email: 'hendro.kasir@yahoo.com',
+    phone: '0813-8899-7711',
+    defaultKodeTransaksi: '01',
+    isPemotongPph23: false
+  }
+];
+
+const DEFAULT_STATIC_PRODUCTS = [
+  {
+    sku: 'SRV-PAYROLL-01',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Pengembangan Sistem SIM Payroll Terintegrasi (Sekali bayar)',
+    satuan: 'Paket',
+    unitPrice: 60000000,
+    isDppNilaiLain: true,
+    isObjekPph23: true
+  },
+  {
+    sku: 'SRV-WAGW-01',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Integrasi & Setup WhatsApp Gateway (Internal) (Sekali bayar)',
+    satuan: 'Paket',
+    unitPrice: 9500000,
+    isDppNilaiLain: true,
+    isObjekPph23: true
+  },
+  {
+    sku: 'SRV-CLOUD-01',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Sewa Cloud Server & Setup Domain (Dibayar per bulan)',
+    satuan: 'Bulan',
+    unitPrice: 4000000,
+    isDppNilaiLain: true,
+    isObjekPph23: true
+  },
+  {
+    sku: 'SRV-TRAIN-01',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Jasa Training & Implementasi (Sekali bayar)',
+    satuan: 'Paket',
+    unitPrice: 1500000,
+    isDppNilaiLain: true,
+    isObjekPph23: true
+  },
+  {
+    sku: 'BCS-2D-HW1',
+    tipe: 'Barang',
+    kategori: 'Hardware',
+    kodeCoretax: '45281001 - Barcode Scanner 1D/2D',
+    name: 'Honeywell HF680 2D Omnidirectional Presentation Barcode Scanner',
+    satuan: 'Unit',
+    unitPrice: 1850000,
+    isDppNilaiLain: true,
+    isObjekPph23: false
+  },
+  {
+    sku: 'PRT-LBL-TSC',
+    tipe: 'Barang',
+    kategori: 'Hardware',
+    kodeCoretax: '45262002 - Printer Label Barcode',
+    name: 'TSC TE200 Barcode Label Printer USB Direct Thermal & Thermal Transfer',
+    satuan: 'Unit',
+    unitPrice: 3200000,
+    isDppNilaiLain: true,
+    isObjekPph23: false
+  }
+];
+
+function terbilangRupiahClient(nominal) {
+  const bilangan = ['', 'Satu', 'Dua', 'Tiga', 'Empat', 'Lima', 'Enam', 'Tujuh', 'Delapan', 'Sembilan', 'Sepuluh', 'Sebelas'];
+  const angka = Math.floor(Math.abs(nominal));
+  if (angka < 12) return bilangan[angka];
+  if (angka < 20) return terbilangRupiahClient(angka - 10) + ' Belas';
+  if (angka < 100) return terbilangRupiahClient(Math.floor(angka / 10)) + ' Puluh ' + terbilangRupiahClient(angka % 10);
+  if (angka < 200) return 'Seratus ' + terbilangRupiahClient(angka - 100);
+  if (angka < 1000) return terbilangRupiahClient(Math.floor(angka / 100)) + ' Ratus ' + terbilangRupiahClient(angka % 100);
+  if (angka < 2000) return 'Seribu ' + terbilangRupiahClient(angka - 1000);
+  if (angka < 1000000) return terbilangRupiahClient(Math.floor(angka / 1000)) + ' Ribu ' + terbilangRupiahClient(angka % 1000);
+  if (angka < 1000000000) return terbilangRupiahClient(Math.floor(angka / 1000000)) + ' Juta ' + terbilangRupiahClient(angka % 1000000);
+  if (angka < 1000000000000) return terbilangRupiahClient(Math.floor(angka / 1000000000)) + ' Miliar ' + terbilangRupiahClient(angka % 1000000000);
+  return terbilangRupiahClient(Math.floor(angka / 1000000000000)) + ' Triliun ' + terbilangRupiahClient(angka % 1000000000000);
+}
+
+function calculateClientSide(items, options) {
+  const ppnRate = Number(options.ppnRate ?? 12);
+  const kodeTransaksi = options.kodeTransaksi || '01';
+  const useDppNilaiLain = Boolean(options.useDppNilaiLain || kodeTransaksi === '04');
+  const hasPph23 = Boolean(options.hasPph23 ?? false);
+  const pph23Rate = Number(options.pph23Rate ?? 2);
+
+  let totalBruto = 0;
+  let totalDiskon = 0;
+
+  const processedItems = items.map((item, index) => {
+    const qty = Math.max(0, Number(item.qty || 1));
+    const unitPrice = Math.max(0, Number(item.unitPrice || 0));
+    const discount = Math.max(0, Number(item.discount || 0));
+    const gross = qty * unitPrice;
+    const netGross = Math.max(0, gross - discount);
+    totalBruto += gross;
+    totalDiskon += discount;
+    return {
+      urutan: index + 1,
+      sku: item.sku || ('ITEM-' + (index + 1)),
+      name: item.name || 'Barang/Jasa Barcode',
+      kategori: item.kategori || 'Hardware',
+      qty,
+      unitPrice,
+      discount,
+      gross,
+      netGross,
+      total: netGross
+    };
+  });
+
+  const subtotalDppDasar = Math.max(0, totalBruto - totalDiskon);
+  let dppPajak = subtotalDppDasar;
+  if (useDppNilaiLain) {
+    if (options.customDppNilaiLain && Number(options.customDppNilaiLain) > 0) {
+      dppPajak = Number(options.customDppNilaiLain);
+    } else {
+      dppPajak = Math.round(subtotalDppDasar * (11 / 12));
+    }
+  }
+
+  const totalPpn = Math.round(dppPajak * (ppnRate / 100));
+  const totalTagihan = subtotalDppDasar + totalPpn;
+  let pph23Amount = 0;
+  if (hasPph23) {
+    pph23Amount = Math.round(subtotalDppDasar * (pph23Rate / 100));
+  }
+  const totalDitransfer = totalTagihan - pph23Amount;
+
+  return {
+    kodeTransaksi,
+    ppnRate,
+    useDppNilaiLain,
+    hasPph23,
+    pph23Rate,
+    items: processedItems,
+    summary: {
+      totalBruto,
+      totalDiskon,
+      subtotalDpp: subtotalDppDasar,
+      totalDpp: dppPajak,
+      dppNilaiLain: useDppNilaiLain ? dppPajak : 0,
+      totalPpn,
+      totalTagihan,
+      pph23Amount,
+      totalDitransfer,
+      terbilang: terbilangRupiahClient(totalDitransfer).trim() + ' Rupiah'
+    }
+  };
+}
+
+function generateClientCoretaxXML(inv) {
+  const seller = inv.seller || sellerProfileData || DEFAULT_STATIC_SELLER;
+  const customer = inv.customer || {};
+  const tax = inv.taxCalculation || {};
+  const summary = tax.summary || {};
+  const items = tax.items || inv.items || [];
+  const invoiceDate = inv.invoiceDate || new Date().toISOString().split('T')[0];
+
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<TaxInvoiceBulk xmlns="http://djp.pajak.go.id/coretax/efaktur/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n';
+  xml += '  <TaxInvoice>\n';
+  xml += '    <InvoiceHeader>\n';
+  xml += '      <InvoiceNumber>' + (inv.invoiceNo || 'INV-001') + '</InvoiceNumber>\n';
+  xml += '      <InvoiceDate>' + invoiceDate + '</InvoiceDate>\n';
+  xml += '      <TransactionCode>' + (tax.kodeTransaksi || '04') + '</TransactionCode>\n';
+  xml += '      <TaxPeriod>' + invoiceDate.substring(5, 7) + '</TaxPeriod>\n';
+  xml += '      <TaxYear>' + invoiceDate.substring(0, 4) + '</TaxYear>\n';
+  xml += '      <ReferenceDocNumber>' + (inv.invoiceNo || 'INV-001') + '</ReferenceDocNumber>\n';
+  xml += '      <Currency>IDR</Currency>\n';
+  xml += '    </InvoiceHeader>\n';
+  xml += '    <Seller>\n';
+  xml += '      <Tin16>' + (seller.npwp16 || '0868643701506000') + '</Tin16>\n';
+  xml += '      <Nitku>' + (seller.nitku || '-') + '</Nitku>\n';
+  xml += '      <Name>' + (seller.name || 'CV. ISTANA BARCODE COMPUTER') + '</Name>\n';
+  xml += '      <Address>' + (seller.address || 'Jl. KH. Moh. Arwani No. 7 Kota Kudus') + '</Address>\n';
+  xml += '      <Email>' + (seller.email || 'istanabarcodecomputer@gmail.com') + '</Email>\n';
+  xml += '      <Phone>' + (seller.phone || '085 640 433 307') + '</Phone>\n';
+  xml += '    </Seller>\n';
+  xml += '    <Buyer>\n';
+  xml += '      <Tin16>' + (customer.npwpOrNik || '0000000000000000') + '</Tin16>\n';
+  xml += '      <Nitku>' + (customer.nitku || '-') + '</Nitku>\n';
+  xml += '      <Name>' + (customer.name || '-') + '</Name>\n';
+  xml += '      <Address>' + (customer.address || '-') + '</Address>\n';
+  xml += '      <Email>' + (customer.email || '-') + '</Email>\n';
+  xml += '      <Phone>' + (customer.phone || '-') + '</Phone>\n';
+  xml += '      <CustomerType>' + (customer.tipeWp || 'BADAN') + '</CustomerType>\n';
+  xml += '    </Buyer>\n';
+  xml += '    <GoodsServicesList>\n';
+  items.forEach((item, idx) => {
+    xml += '      <GoodService>\n';
+    xml += '        <ItemSequence>' + (item.urutan || (idx + 1)) + '</ItemSequence>\n';
+    xml += '        <ItemCode>' + (item.sku || 'SKU') + '</ItemCode>\n';
+    xml += '        <ItemDescription>' + (item.name || '') + '</ItemDescription>\n';
+    xml += '        <ItemCategory>' + (item.kategori || 'Jasa') + '</ItemCategory>\n';
+    xml += '        <Quantity>' + (item.qty || 1) + '</Quantity>\n';
+    xml += '        <UnitPrice>' + (item.unitPrice || 0) + '</UnitPrice>\n';
+    xml += '        <Discount>' + (item.discount || 0) + '</Discount>\n';
+    xml += '        <TotalAmount>' + (item.total || item.gross || 0) + '</TotalAmount>\n';
+    xml += '      </GoodService>\n';
+  });
+  xml += '    </GoodsServicesList>\n';
+  xml += '    <TaxSummary>\n';
+  xml += '      <SubtotalBaseAmount>' + (summary.subtotalDpp || 0) + '</SubtotalBaseAmount>\n';
+  xml += '      <TaxBaseDpp>' + (summary.totalDpp || 0) + '</TaxBaseDpp>\n';
+  xml += '      <IsOtherTaxBase>' + (tax.useDppNilaiLain ? 'true' : 'false') + '</IsOtherTaxBase>\n';
+  xml += '      <VatRate>' + (tax.ppnRate || 12) + '</VatRate>\n';
+  xml += '      <VatAmount>' + (summary.totalPpn || 0) + '</VatAmount>\n';
+  xml += '      <TotalInvoiceAmount>' + (summary.totalTagihan || 0) + '</TotalInvoiceAmount>\n';
+  xml += '      <WithholdingTaxRate>' + (tax.hasPph23 ? (tax.pph23Rate || 2) : 0) + '</WithholdingTaxRate>\n';
+  xml += '      <WithholdingTaxAmount>' + (summary.pph23Amount || 0) + '</WithholdingTaxAmount>\n';
+  xml += '      <NetPayableAmount>' + (summary.totalDitransfer || 0) + '</NetPayableAmount>\n';
+  xml += '    </TaxSummary>\n';
+  xml += '  </TaxInvoice>\n';
+  xml += '</TaxInvoiceBulk>';
+  return xml;
+}
+
+let invoiceHistoryList = [];
+
+window.downloadInvoiceXml = function(invoiceNoEncoded) {
+  const invoiceNo = decodeURIComponent(invoiceNoEncoded);
+  const inv = (invoiceHistoryList || []).find(i => i.invoiceNo === invoiceNo) || savedInvoiceData;
+  if (!inv) {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      window.location.href = '/api/invoices/' + encodeURIComponent(invoiceNo) + '/export-xml';
+      return;
+    }
+    alert('Data nota tidak ditemukan untuk diekspor.');
+    return;
+  }
+  const xml = generateClientCoretaxXML(inv);
+  const blob = new Blob([xml], { type: 'application/xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'eFaktur_Coretax_' + invoiceNo.replace(/[\/\\]/g, '_') + '.xml';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
 let catalogProducts = [];
 let sampleCustomers = [];
 let currentTaxCalculation = null;
@@ -37,19 +365,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function loadCustomerMaster() {
   try {
     const res = await fetch('/api/invoices/customers');
-    const data = await res.json();
-    if (data.success) {
-      sampleCustomers = data.data;
-      const select = document.getElementById('quickCustomerSelect');
-      sampleCustomers.forEach(cust => {
-        const opt = document.createElement('option');
-        opt.value = cust.id;
-        opt.textContent = `[${cust.tipeWp}] ${cust.name}`;
-        select.appendChild(opt);
-      });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        sampleCustomers = data.data;
+      }
     }
   } catch (err) {
-    console.error('Gagal mengambil master lawan transaksi:', err);
+    console.log('Customer API offline, fallback to local');
+  }
+
+  if (!sampleCustomers || sampleCustomers.length === 0) {
+    const local = localStorage.getItem('IBC_CUSTOMERS');
+    sampleCustomers = local ? JSON.parse(local) : DEFAULT_STATIC_CUSTOMERS;
+  }
+
+  const select = document.getElementById('quickCustomerSelect');
+  if (select) {
+    select.innerHTML = '<option value="">-- Pilih Rekanan / Customer Coretax --</option>';
+    sampleCustomers.forEach(cust => {
+      const opt = document.createElement('option');
+      opt.value = cust.id;
+      opt.textContent = `[${cust.tipeWp}] ${cust.name}`;
+      select.appendChild(opt);
+    });
   }
 }
 
@@ -137,19 +476,30 @@ function setupInitialSampleData() {
 async function loadProductCatalog() {
   try {
     const res = await fetch('/api/invoices/products');
-    const data = await res.json();
-    if (data.success) {
-      catalogProducts = data.data;
-      const select = document.getElementById('quickCatalogSelect');
-      catalogProducts.forEach(prod => {
-        const opt = document.createElement('option');
-        opt.value = prod.sku;
-        opt.textContent = `[${prod.kategori}] ${prod.name} (${formatRupiah(prod.unitPrice)})`;
-        select.appendChild(opt);
-      });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+        catalogProducts = data.data;
+      }
     }
   } catch (err) {
-    console.error('Gagal mengambil katalog produk:', err);
+    console.log('Products API offline, fallback to local');
+  }
+
+  if (!catalogProducts || catalogProducts.length === 0) {
+    const local = localStorage.getItem('IBC_PRODUCTS');
+    catalogProducts = local ? JSON.parse(local) : DEFAULT_STATIC_PRODUCTS;
+  }
+
+  const select = document.getElementById('quickCatalogSelect');
+  if (select) {
+    select.innerHTML = '<option value="">-- Tambah Cepat dari Katalog Produk/Jasa --</option>';
+    catalogProducts.forEach(prod => {
+      const opt = document.createElement('option');
+      opt.value = prod.sku;
+      opt.textContent = `[${prod.kategori}] ${prod.name} (${formatRupiah(prod.unitPrice)})`;
+      select.appendChild(opt);
+    });
   }
 }
 
@@ -158,59 +508,76 @@ let sellerProfileData = null;
 async function loadSellerProfile() {
   try {
     const res = await fetch('/api/invoices/seller-profile');
-    const data = await res.json();
-    if (data.success) {
-      sellerProfileData = data.data;
-      document.getElementById('sellerBadge').textContent = `NPWP: ${data.data.npwp16}`;
-
-      // Isi form settings
-      const sName = document.getElementById('sellerName');
-      if (sName) sName.value = data.data.name || '';
-      const sTagline = document.getElementById('sellerTagline');
-      if (sTagline) sTagline.value = data.data.tagline || 'Official IT Solution & POS Barcode Hardware System';
-      const sPhone = document.getElementById('sellerPhone');
-      if (sPhone) sPhone.value = data.data.phone || '';
-      const sNpwp = document.getElementById('sellerNpwp16');
-      if (sNpwp) sNpwp.value = data.data.npwp16 || '';
-      const sNitku = document.getElementById('sellerNitku');
-      if (sNitku) sNitku.value = data.data.nitku || '';
-      const sAddr = document.getElementById('sellerAddress');
-      if (sAddr) sAddr.value = data.data.address || '';
-      const sBank = document.getElementById('sellerBankName');
-      if (sBank) sBank.value = data.data.bankName || 'Bank BCA';
-      const sAcc = document.getElementById('sellerBankAccount');
-      if (sAcc) sAcc.value = data.data.bankAccount || '';
-      const sAccName = document.getElementById('sellerBankAccountName');
-      if (sAccName) sAccName.value = data.data.bankAccountName || '';
-      const sEmail = document.getElementById('sellerEmailTax');
-      if (sEmail) sEmail.value = data.data.email || '';
-      const sNotes = document.getElementById('sellerDefaultNotes');
-      if (sNotes) sNotes.value = data.data.defaultNotes || '';
-
-      // Set default ke form nota jika ada
-      if (data.data.defaultNotes) {
-        document.getElementById('invoiceNotes').value = data.data.defaultNotes;
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        sellerProfileData = data.data;
       }
-
-      // Update logo UI jika tersimpan
-      if (data.data.logoBase64) {
-        updateLogoInUI(data.data.logoBase64);
-      }
-
-      // Update stempel UI jika tersimpan
-      if (data.data.stempelBase64) {
-        updateStempelInUI(data.data.stempelBase64);
-      }
-
-      // Isi penandatangan manager
-      const mgrName = document.getElementById('sellerManagerName');
-      if (mgrName) mgrName.value = data.data.managerName || 'Djohan Hutagalung, S.Kom.';
-      const mgrTitle = document.getElementById('sellerManagerTitle');
-      if (mgrTitle) mgrTitle.value = data.data.managerTitle || 'Manager CV. Istana Barcode Computer';
     }
   } catch (err) {
-    console.error('Gagal memuat profil penjual:', err);
+    console.log('Seller profile API offline, fallback to local');
   }
+
+  if (!sellerProfileData) {
+    const local = localStorage.getItem('IBC_SELLER_PROFILE');
+    sellerProfileData = local ? JSON.parse(local) : DEFAULT_STATIC_SELLER;
+  }
+
+  const sData = sellerProfileData;
+  document.getElementById('sellerBadge').textContent = 'NPWP: ' + sData.npwp16;
+
+  const hLogo = document.getElementById('headerLogoImg');
+  const hIcon = document.getElementById('headerDefaultIcon');
+  if (hLogo) {
+    hLogo.src = sData.logoBase64 || sData.logoUrl || 'assets/logo_ibc.png';
+    hLogo.style.display = 'block';
+    if (hIcon) hIcon.style.display = 'none';
+  }
+
+  // Isi form settings
+  const sName = document.getElementById('sellerName');
+  if (sName) sName.value = sData.name || '';
+  const sTagline = document.getElementById('sellerTagline');
+  if (sTagline) sTagline.value = sData.tagline || 'Official IT Solution & POS Barcode Hardware System';
+  const sPhone = document.getElementById('sellerPhone');
+  if (sPhone) sPhone.value = sData.phone || '';
+  const sNpwp = document.getElementById('sellerNpwp16');
+  if (sNpwp) sNpwp.value = sData.npwp16 || '';
+  const sNitku = document.getElementById('sellerNitku');
+  if (sNitku) sNitku.value = sData.nitku || '';
+  const sAddr = document.getElementById('sellerAddress');
+  if (sAddr) sAddr.value = sData.address || '';
+  const sBank = document.getElementById('sellerBankName');
+  if (sBank) sBank.value = sData.bankName || 'Bank BCA';
+  const sAcc = document.getElementById('sellerBankAccount');
+  if (sAcc) sAcc.value = sData.bankAccount || '';
+  const sAccName = document.getElementById('sellerBankAccountName');
+  if (sAccName) sAccName.value = sData.bankAccountName || '';
+  const sEmail = document.getElementById('sellerEmailTax');
+  if (sEmail) sEmail.value = sData.email || '';
+  const sNotes = document.getElementById('sellerDefaultNotes');
+  if (sNotes) sNotes.value = sData.defaultNotes || '';
+
+  // Set default ke form nota jika ada
+  if (sData.defaultNotes) {
+    document.getElementById('invoiceNotes').value = sData.defaultNotes;
+  }
+
+  // Update logo UI jika tersimpan
+  if (sData.logoBase64) {
+    updateLogoInUI(sData.logoBase64);
+  }
+
+  // Update stempel UI jika tersimpan
+  if (sData.stempelBase64) {
+    updateStempelInUI(sData.stempelBase64);
+  }
+
+  // Isi penandatangan manager
+  const mgrName = document.getElementById('sellerManagerName');
+  if (mgrName) mgrName.value = sData.managerName || 'Djohan Hutagalung, S.Kom.';
+  const mgrTitle = document.getElementById('sellerManagerTitle');
+  if (mgrTitle) mgrTitle.value = sData.managerTitle || 'Manager CV. Istana Barcode Computer';
 }
 
 function setupEventListeners() {
@@ -319,7 +686,11 @@ function setupEventListeners() {
       alert('Silakan simpan nota terlebih dahulu sebelum mendownload file XML Coretax.');
       return;
     }
-    window.location.href = `/api/invoices/${encodeURIComponent(savedInvoiceData.invoiceNo)}/export-xml`;
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      window.location.href = '/api/invoices/' + encodeURIComponent(savedInvoiceData.invoiceNo) + '/export-xml';
+    } else {
+      downloadInvoiceXml(savedInvoiceData.invoiceNo);
+    }
   });
 
   // Print Modal
@@ -695,7 +1066,17 @@ async function triggerRecalculate() {
       renderTaxSummary(data.data);
     }
   } catch (err) {
-    console.error('Kalkulasi pajak gagal:', err);
+    console.log('Kalkulasi API offline, fallback client math');
+    const clientCalc = calculateClientSide(items, {
+      ppnRate,
+      kodeTransaksi,
+      useDppNilaiLain,
+      customDppNilaiLain: customDppNilaiLain ? Number(customDppNilaiLain) : null,
+      hasPph23,
+      pph23Rate
+    });
+    currentTaxCalculation = clientCalc;
+    renderTaxSummary(clientCalc);
   }
 }
 
@@ -819,8 +1200,25 @@ async function saveCurrentInvoice() {
       alert(`Gagal menyimpan: ${(data.errors || []).join(', ')}`);
     }
   } catch (err) {
-    console.error('Error saat menyimpan nota:', err);
-    alert('Terjadi kesalahan koneksi saat menyimpan nota.');
+    console.log('Save API offline, fallback localStorage save');
+    const taxCalc = calculateClientSide(payload.items, payload.options);
+    savedInvoiceData = {
+      ...payload,
+      taxCalculation: taxCalc,
+      createdAt: new Date().toISOString()
+    };
+    let hist = [];
+    try {
+      const raw = localStorage.getItem('IBC_INVOICE_HISTORY');
+      if (raw) hist = JSON.parse(raw);
+    } catch(e) {}
+    hist = hist.filter(i => i.invoiceNo !== savedInvoiceData.invoiceNo);
+    hist.unshift(savedInvoiceData);
+    localStorage.setItem('IBC_INVOICE_HISTORY', JSON.stringify(hist));
+    document.getElementById('btnDownloadXml').disabled = false;
+    alert(`✅ Nota ${invoiceNo} berhasil disimpan (Static Local Storage)!
+Ringkasan Pembayaran & Nilai Coretax tervalidasi.
+File XML Coretax sekarang dapat diunduh.`);
   }
 }
 
@@ -1098,39 +1496,52 @@ function closePrintModal() {
 }
 
 async function loadInvoiceHistory() {
+  let list = [];
   try {
     const res = await fetch('/api/invoices/list');
-    const data = await res.json();
-    const tbody = document.getElementById('invoiceListBody');
-    tbody.innerHTML = '';
-
-    if (!data.success || data.data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" class="text-center" style="padding: 24px; color: #64748b;">Belum ada riwayat nota yang tersimpan.</td></tr>`;
-      return;
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.data)) list = data.data;
     }
-
-    data.data.forEach(inv => {
-      const summary = inv.taxCalculation?.summary || {};
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td><strong class="input-mono">${inv.invoiceNo}</strong></td>
-        <td>${inv.invoiceDate}</td>
-        <td><strong>${inv.customer?.name || '-'}</strong>${inv.customer?.pic ? `<br><small style="color: #2563eb;">👤 Up: ${inv.customer.pic}</small>` : ''}</td>
-        <td class="text-right">${formatRupiah(summary.subtotalDpp)}</td>
-        <td class="text-right text-success">${formatRupiah(summary.totalPpn)}</td>
-        <td class="text-right text-danger">${summary.pph23Amount ? '(' + formatRupiah(summary.pph23Amount) + ')' : '-'}</td>
-        <td class="text-right"><strong>${formatRupiah(summary.totalDitransfer)}</strong></td>
-        <td>
-          <a href="/api/invoices/${encodeURIComponent(inv.invoiceNo)}/export-xml" class="btn btn-sm btn-success" title="Download XML Coretax">
-            📥 XML
-          </a>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
   } catch (err) {
-    console.error('Gagal memuat riwayat nota:', err);
+    console.log('Riwayat API offline, membaca riwayat lokal');
   }
+
+  if (!list || list.length === 0) {
+    const local = localStorage.getItem('IBC_INVOICE_HISTORY');
+    if (local) {
+      try { list = JSON.parse(local); } catch (e) {}
+    }
+  }
+
+  invoiceHistoryList = list;
+  const tbody = document.getElementById('invoiceListBody');
+  tbody.innerHTML = '';
+
+  if (!list || list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" class="text-center" style="padding: 24px; color: #64748b;">Belum ada riwayat nota yang tersimpan.</td></tr>';
+    return;
+  }
+
+  list.forEach(inv => {
+    const summary = inv.taxCalculation?.summary || {};
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong class="input-mono">${inv.invoiceNo}</strong></td>
+      <td>${inv.invoiceDate}</td>
+      <td><strong>${inv.customer?.name || '-'}</strong>${inv.customer?.pic ? `<br><small style="color: #2563eb;">👤 Up: ${inv.customer.pic}</small>` : ''}</td>
+      <td class="text-right">${formatRupiah(summary.subtotalDpp)}</td>
+      <td class="text-right text-success">${formatRupiah(summary.totalPpn)}</td>
+      <td class="text-right text-danger">${summary.pph23Amount ? '(' + formatRupiah(summary.pph23Amount) + ')' : '-'}</td>
+      <td class="text-right"><strong>${formatRupiah(summary.totalDitransfer)}</strong></td>
+      <td>
+        <button class="btn btn-sm btn-success" title="Download XML Coretax" onclick="downloadInvoiceXml('${encodeURIComponent(inv.invoiceNo)}')">
+          📥 XML
+        </button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
 
 // ==========================================
@@ -1497,7 +1908,16 @@ async function saveSellerSettingsHandler() {
       alert('✅ Profil toko & instruksi transfer berhasil diperbarui!\nCatatan ini akan otomatis muncul pada setiap nota baru.');
     }
   } catch (err) {
-    console.error('Gagal menyimpan profil seller:', err);
-    alert('Terjadi kesalahan saat menyimpan pengaturan toko.');
+    console.log('Seller profile API offline, fallback to localStorage');
+    sellerProfileData = payload;
+    localStorage.setItem('IBC_SELLER_PROFILE', JSON.stringify(payload));
+    document.getElementById('sellerBadge').textContent = 'NPWP: ' + payload.npwp16;
+    document.getElementById('invoiceNotes').value = defaultNotes;
+    const feedback = document.getElementById('sellerSaveFeedback');
+    if (feedback) {
+      feedback.textContent = '✅ Profil toko tersimpan secara lokal (Browser Storage)!';
+      setTimeout(() => { feedback.textContent = ''; }, 4000);
+    }
+    alert('✅ Profil toko berhasil diperbarui secara lokal!');
   }
 }
