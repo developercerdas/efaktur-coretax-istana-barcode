@@ -324,7 +324,343 @@ function generateClientCoretaxXML(inv) {
   return xml;
 }
 
+const DEFAULT_STATIC_INVOICES = [
+  {
+    "invoiceNo": "INV/IBC/202610/5962",
+    "invoiceDate": "2026-10-29",
+    "customer": {
+      "name": "PT. SUKUN WARTONO INDONESIA",
+      "pic": "Bapak Chaulana R. Wartono",
+      "jabatan": "Chief Of Legal HR & GA",
+      "tipeWp": "BADAN",
+      "npwpOrNik": "0937832202506000",
+      "nitku": "0937832202506000000000",
+      "address": "Jl. Raya PR Sukun, 01, Gondosari Gebog, Kab. Kudus, Jawa Tengah 59354",
+      "phone": "-",
+      "email": "-"
+    },
+    "options": {
+      "ppnRate": 12,
+      "kodeTransaksi": "04",
+      "useDppNilaiLain": true,
+      "customDppNilaiLain": 68750000,
+      "hasPph23": true,
+      "pph23Rate": 2
+    },
+    "items": [
+      {
+        "sku": "SRV-PAYROLL-001",
+        "name": "Jasa Pembuatan Aplikasi Sistem Informasi Manajemen Payroll",
+        "kategori": "Jasa",
+        "qty": 1,
+        "unitPrice": 75000000,
+        "discount": 0
+      }
+    ],
+    "taxCalculation": {
+      "kodeTransaksi": "04",
+      "ppnRate": 12,
+      "isPpnIncluded": false,
+      "useDppNilaiLain": true,
+      "hasPph23": true,
+      "pph23Rate": 2,
+      "items": [
+        {
+          "urutan": 1,
+          "sku": "SRV-PAYROLL-001",
+          "name": "Jasa Pembuatan Aplikasi Sistem Informasi Manajemen Payroll",
+          "kategori": "Jasa",
+          "qty": 1,
+          "unitPrice": 75000000,
+          "discount": 0,
+          "gross": 75000000,
+          "netGross": 75000000,
+          "total": 75000000
+        }
+      ],
+      "summary": {
+        "totalBruto": 75000000,
+        "totalDiskon": 0,
+        "subtotalDpp": 75000000,
+        "dppNilaiLain": 68750000,
+        "totalDpp": 68750000,
+        "totalPpn": 8250000,
+        "totalTagihan": 83250000,
+        "pph23Rate": 2,
+        "pph23Amount": 1500000,
+        "totalDitransfer": 81750000,
+        "terbilang": "Delapan Puluh Satu Juta Tujuh Ratus Lima Puluh  Ribu Rupiah"
+      }
+    },
+    "seller": {
+      "npwp16": "0328912340510000",
+      "nitku": "0328912340510000000000",
+      "name": "CV. ISTANA BARCODE COMPUTER",
+      "address": "Ruko Istana Barcode, Jl. Otomasi Kasir No. 88, Indonesia",
+      "email": "tax@istanabarcode.com",
+      "phone": "0812-3456-7890"
+    },
+    "status": "ACTIVE",
+    "id": "INV-1793247856922",
+    "createdAt": "2026-10-29T04:24:16.922Z",
+    "updatedAt": "2026-10-29T04:34:03.808Z"
+  },
+  {
+    "invoiceNo": "INV/IBC/202610/8515",
+    "invoiceDate": "2026-10-28",
+    "customer": {
+      "name": "PT. SUKUN WARTONO INDONESIA",
+      "tipeWp": "BADAN",
+      "npwpOrNik": "0937832202506000",
+      "nitku": "0937832202506000000000",
+      "address": "Jl. Raya PR Sukun, 01, Gondosari Gebog, Kab. Kudus, Jawa Tengah 59354",
+      "phone": "021-4680xxxx"
+    },
+    "options": {
+      "ppnRate": 12,
+      "kodeTransaksi": "04",
+      "useDppNilaiLain": true,
+      "customDppNilaiLain": 68750000,
+      "hasPph23": true,
+      "pph23Rate": 2
+    },
+    "items": [
+      {
+        "sku": "SRV-PAYROLL-001",
+        "name": "Jasa Pembuatan Aplikasi Sistem Informasi Manajemen Payroll",
+        "kategori": "Jasa",
+        "qty": 1,
+        "unitPrice": 75000000,
+        "discount": 0
+      }
+    ],
+    "taxCalculation": {
+      "kodeTransaksi": "04",
+      "ppnRate": 12,
+      "isPpnIncluded": false,
+      "useDppNilaiLain": true,
+      "hasPph23": true,
+      "pph23Rate": 2,
+      "items": [
+        {
+          "urutan": 1,
+          "sku": "SRV-PAYROLL-001",
+          "name": "Jasa Pembuatan Aplikasi Sistem Informasi Manajemen Payroll",
+          "kategori": "Jasa",
+          "qty": 1,
+          "unitPrice": 75000000,
+          "discount": 0,
+          "gross": 75000000,
+          "netGross": 75000000,
+          "total": 75000000
+        }
+      ],
+      "summary": {
+        "totalBruto": 75000000,
+        "totalDiskon": 0,
+        "subtotalDpp": 75000000,
+        "dppNilaiLain": 68750000,
+        "totalDpp": 68750000,
+        "totalPpn": 8250000,
+        "totalTagihan": 83250000,
+        "pph23Rate": 2,
+        "pph23Amount": 1500000,
+        "totalDitransfer": 81750000,
+        "terbilang": "Delapan Puluh Satu Juta Tujuh Ratus Lima Puluh  Ribu Rupiah"
+      }
+    },
+    "seller": {
+      "npwp16": "0328912340510000",
+      "nitku": "0328912340510000000000",
+      "name": "CV. ISTANA BARCODE COMPUTER",
+      "address": "Ruko Istana Barcode, Jl. Otomasi Kasir No. 88, Indonesia",
+      "email": "tax@istanabarcode.com",
+      "phone": "0812-3456-7890"
+    },
+    "status": "ACTIVE",
+    "id": "INV-1793173967636",
+    "createdAt": "2026-10-28T07:52:47.636Z",
+    "updatedAt": "2026-10-28T07:53:03.537Z"
+  },
+  {
+    "invoiceNo": "INV/IBC/202610/8480",
+    "invoiceDate": "2026-10-27",
+    "customer": {
+      "name": "PT. SUKUN WARTONO INDONESIA",
+      "tipeWp": "BADAN",
+      "npwpOrNik": "0937832202506000",
+      "nitku": "0937832202506000000000",
+      "address": "Jl. Raya PR Sukun, 01, Gondosari Gebog, Kab. Kudus, Jawa Tengah 59354",
+      "phone": "021-4680xxxx"
+    },
+    "options": {
+      "ppnRate": 12,
+      "kodeTransaksi": "04",
+      "useDppNilaiLain": true,
+      "customDppNilaiLain": 68750000,
+      "hasPph23": true,
+      "pph23Rate": 2
+    },
+    "items": [
+      {
+        "sku": "SRV-PAYROLL-001",
+        "name": "Jasa Pembuatan Aplikasi Sistem Informasi Manajemen Payroll",
+        "kategori": "Jasa",
+        "qty": 1,
+        "unitPrice": 75000000,
+        "discount": 0
+      }
+    ],
+    "taxCalculation": {
+      "kodeTransaksi": "04",
+      "ppnRate": 12,
+      "isPpnIncluded": false,
+      "useDppNilaiLain": true,
+      "hasPph23": true,
+      "pph23Rate": 2,
+      "items": [
+        {
+          "urutan": 1,
+          "sku": "SRV-PAYROLL-001",
+          "name": "Jasa Pembuatan Aplikasi Sistem Informasi Manajemen Payroll",
+          "kategori": "Jasa",
+          "qty": 1,
+          "unitPrice": 75000000,
+          "discount": 0,
+          "gross": 75000000,
+          "netGross": 75000000,
+          "total": 75000000
+        }
+      ],
+      "summary": {
+        "totalBruto": 75000000,
+        "totalDiskon": 0,
+        "subtotalDpp": 75000000,
+        "dppNilaiLain": 68750000,
+        "totalDpp": 68750000,
+        "totalPpn": 8250000,
+        "totalTagihan": 83250000,
+        "pph23Rate": 2,
+        "pph23Amount": 1500000,
+        "totalDitransfer": 81750000,
+        "terbilang": "Delapan Puluh Satu Juta Tujuh Ratus Lima Puluh  Ribu Rupiah"
+      }
+    },
+    "seller": {
+      "npwp16": "0328912340510000",
+      "nitku": "0328912340510000000000",
+      "name": "CV. ISTANA BARCODE COMPUTER",
+      "address": "Ruko Istana Barcode, Jl. Otomasi Kasir No. 88, Indonesia",
+      "email": "tax@istanabarcode.com",
+      "phone": "0812-3456-7890"
+    },
+    "status": "ACTIVE",
+    "id": "INV-1793087109482",
+    "createdAt": "2026-10-27T07:45:09.482Z",
+    "updatedAt": "2026-10-27T07:45:30.546Z"
+  },
+  {
+    "invoiceNo": "INV/IBC/202610/3907",
+    "invoiceDate": "2026-10-27",
+    "customer": {
+      "name": "PT. SUKUN WARTONO INDONESIA",
+      "tipeWp": "BADAN",
+      "npwpOrNik": "0937832202506000",
+      "nitku": "0937832202506000000000",
+      "address": "JL. RAYA PR SUKUN, 01, GONDOSARI GEBOG KAB. KUDUS JAWA TENGAH 59354",
+      "phone": ""
+    },
+    "options": {
+      "ppnRate": 12,
+      "kodeTransaksi": "04",
+      "useDppNilaiLain": true,
+      "customDppNilaiLain": 68750000,
+      "hasPph23": true,
+      "pph23Rate": 2
+    },
+    "items": [
+      {
+        "sku": "SRV-PAYROLL-001",
+        "name": "Jasa Pembuatan Aplikasi Sistem Informasi Manajemen Payroll",
+        "kategori": "Jasa",
+        "qty": 1,
+        "unitPrice": 75000000,
+        "discount": 0
+      }
+    ],
+    "taxCalculation": {
+      "kodeTransaksi": "04",
+      "ppnRate": 12,
+      "isPpnIncluded": false,
+      "useDppNilaiLain": true,
+      "hasPph23": true,
+      "pph23Rate": 2,
+      "items": [
+        {
+          "urutan": 1,
+          "sku": "SRV-PAYROLL-001",
+          "name": "Jasa Pembuatan Aplikasi Sistem Informasi Manajemen Payroll",
+          "kategori": "Jasa",
+          "qty": 1,
+          "unitPrice": 75000000,
+          "discount": 0,
+          "gross": 75000000,
+          "netGross": 75000000,
+          "total": 75000000
+        }
+      ],
+      "summary": {
+        "totalBruto": 75000000,
+        "totalDiskon": 0,
+        "subtotalDpp": 75000000,
+        "dppNilaiLain": 68750000,
+        "totalDpp": 68750000,
+        "totalPpn": 8250000,
+        "totalTagihan": 83250000,
+        "pph23Rate": 2,
+        "pph23Amount": 1500000,
+        "totalDitransfer": 81750000,
+        "terbilang": "Delapan Puluh Satu Juta Tujuh Ratus Lima Puluh  Ribu Rupiah"
+      }
+    },
+    "seller": {
+      "npwp16": "0328912340510000",
+      "nitku": "0328912340510000000000",
+      "name": "CV. ISTANA BARCODE COMPUTER",
+      "address": "Ruko Istana Barcode, Jl. Otomasi Kasir No. 88, Indonesia",
+      "email": "tax@istanabarcode.com",
+      "phone": "0812-3456-7890"
+    },
+    "status": "ACTIVE",
+    "id": "INV-1793077375535",
+    "createdAt": "2026-10-27T05:02:55.535Z"
+  }
+];
+
 let invoiceHistoryList = [];
+
+
+window.viewHistoryInvoice = function(invoiceNoEncoded) {
+  const invoiceNo = decodeURIComponent(invoiceNoEncoded);
+  const inv = (invoiceHistoryList || []).find(i => i.invoiceNo === invoiceNo);
+  if (!inv) {
+    alert('Data nota tidak ditemukan.');
+    return;
+  }
+  currentTaxCalculation = inv.taxCalculation;
+  currentTransactionMode = (inv.isNonPajak || inv.options?.isNonPajak || inv.taxCalculation?.isNonPajak) ? 'NON_PAJAK' : 'PAJAK';
+  document.getElementById('invoiceNo').value = inv.invoiceNo;
+  document.getElementById('invoiceDate').value = inv.invoiceDate;
+  document.getElementById('customerName').value = inv.customer?.name || '';
+  if (document.getElementById('customerPic')) document.getElementById('customerPic').value = inv.customer?.pic || '';
+  if (document.getElementById('customerJabatan')) document.getElementById('customerJabatan').value = inv.customer?.jabatan || '';
+  if (document.getElementById('customerAddress')) document.getElementById('customerAddress').value = inv.customer?.address || '';
+  if (document.getElementById('npwpOrNik')) document.getElementById('npwpOrNik').value = inv.customer?.npwpOrNik || '';
+  if (document.getElementById('nitku')) document.getElementById('nitku').value = inv.customer?.nitku || '';
+  if (document.getElementById('invoiceNotes')) document.getElementById('invoiceNotes').value = inv.seller?.defaultNotes || '';
+
+  openPrintModal();
+};
 
 window.downloadInvoiceXml = function(invoiceNoEncoded) {
   const invoiceNo = decodeURIComponent(invoiceNoEncoded);
@@ -1607,6 +1943,10 @@ async function loadInvoiceHistory() {
     }
   }
 
+  if (!list || list.length === 0) {
+    list = [...DEFAULT_STATIC_INVOICES];
+  }
+
   invoiceHistoryList = list;
   const tbody = document.getElementById('invoiceListBody');
   tbody.innerHTML = '';
@@ -1627,11 +1967,14 @@ async function loadInvoiceHistory() {
       <td class="text-right text-success">${formatRupiah(summary.totalPpn)}</td>
       <td class="text-right text-danger">${summary.pph23Amount ? '(' + formatRupiah(summary.pph23Amount) + ')' : '-'}</td>
       <td class="text-right"><strong>${formatRupiah(summary.totalDitransfer)}</strong></td>
-      <td>
-        <button class="btn btn-sm btn-success" title="Download XML Coretax" onclick="downloadInvoiceXml('${encodeURIComponent(inv.invoiceNo)}')">
-          📥 XML
-        </button>
-      </td>
+              <td>
+          <button class="btn btn-sm btn-secondary" title="Buka & Cetak Nota" onclick="viewHistoryInvoice('${encodeURIComponent(inv.invoiceNo)}')">
+            🖨️ Cetak
+          </button>
+          <button class="btn btn-sm btn-success" title="Download XML Coretax" onclick="downloadInvoiceXml('${encodeURIComponent(inv.invoiceNo)}')">
+            📥 XML
+          </button>
+        </td>
     `;
     tbody.appendChild(tr);
   });
@@ -1741,23 +2084,24 @@ async function saveCustomerMaster() {
   const defaultKodeTransaksi = document.getElementById('custMasterKodeTrx').value;
   const isPemotongPph23 = document.getElementById('custMasterPph23').checked;
 
-  if (!name || !npwpOrNik) {
-    alert('Nama dan NPWP 16/NIK wajib diisi!');
+  if (!name) {
+    alert('Nama pembeli / perusahaan / rekanan wajib diisi!');
     return;
   }
 
-  if (npwpOrNik.length === 16 && (!nitku || nitku.length < 22)) {
+  if (npwpOrNik && npwpOrNik.length === 16 && (!nitku || nitku.length < 22)) {
     nitku = npwpOrNik + '000000';
   }
 
+  const generatedId = id || ('CUST-' + Date.now().toString().slice(-4));
   const payload = {
-    id: id || undefined,
+    id: generatedId,
     tipeWp,
     name,
     pic,
     jabatan,
-    npwpOrNik,
-    nitku: nitku || '0000000000000000000000',
+    npwpOrNik: npwpOrNik || '-',
+    nitku: nitku || '-',
     address,
     email,
     phone,
@@ -1771,18 +2115,34 @@ async function saveCustomerMaster() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (data.success) {
-      closeCustomerModal();
-      await renderCustomerMasterTable();
-      refreshCustomerDropdown();
-      alert('✅ Master Lawan Transaksi berhasil disimpan!');
-    } else {
-      alert(`Gagal: ${data.message}`);
+    if (res.ok) {
+      console.log('Saved customer to server');
     }
   } catch (err) {
-    console.error('Gagal menyimpan master customer:', err);
+    console.log('Customer API offline, fallback localStorage');
   }
+
+  // Always update in-memory and localStorage
+  let custs = [];
+  try {
+    const raw = localStorage.getItem('IBC_CUSTOMERS');
+    if (raw) custs = JSON.parse(raw);
+  } catch (e) {}
+  if (!custs || custs.length === 0) custs = [...DEFAULT_STATIC_CUSTOMERS];
+
+  const idx = custs.findIndex(c => c.id === payload.id);
+  if (idx >= 0) {
+    custs[idx] = payload;
+  } else {
+    custs.push(payload);
+  }
+  localStorage.setItem('IBC_CUSTOMERS', JSON.stringify(custs));
+  sampleCustomers = custs;
+
+  closeCustomerModal();
+  await renderCustomerMasterTable();
+  refreshCustomerDropdown();
+  alert(`✅ Master Lawan Transaksi "${payload.name}" berhasil disimpan!`);
 }
 
 function refreshCustomerDropdown() {
@@ -1869,16 +2229,25 @@ window.deleteProductMaster = async function(sku) {
   if (!confirm(`Hapus master produk/jasa SKU: ${sku}?`)) return;
   try {
     const res = await fetch(`/api/invoices/products/${encodeURIComponent(sku)}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (data.success) {
-      await renderProductMasterTable();
-      refreshProductDropdown();
-    } else {
-      alert('Gagal menghapus produk/jasa');
+    if (res.ok) {
+      console.log('Deleted product from server');
     }
   } catch (err) {
-    console.error('Error delete product:', err);
+    console.log('Delete product API offline, deleting from localStorage');
   }
+
+  let prods = [];
+  try {
+    const raw = localStorage.getItem('IBC_PRODUCTS');
+    if (raw) prods = JSON.parse(raw);
+  } catch (e) {}
+  if (!prods || prods.length === 0) prods = [...catalogProducts];
+  prods = prods.filter(p => p.sku !== sku);
+  localStorage.setItem('IBC_PRODUCTS', JSON.stringify(prods));
+  catalogProducts = prods;
+  await renderProductMasterTable();
+  refreshProductDropdown();
+  alert(`✅ SKU ${sku} berhasil dihapus.`);
 };
 
 async function saveProductMaster() {
@@ -1901,9 +2270,9 @@ async function saveProductMaster() {
     tipe,
     name,
     kategori: tipe,
-    kodeCoretax,
-    satuan,
-    unitPrice,
+    kodeCoretax: kodeCoretax || (tipe === 'Jasa' ? '000000 - Jasa' : '45281001 - Barcode Scanner'),
+    satuan: satuan || 'Unit',
+    unitPrice: isNaN(unitPrice) ? 0 : unitPrice,
     isDppNilaiLain,
     dppNilaiLainCustom: isDppNilaiLain ? Math.round(unitPrice * (11 / 12)) : null,
     ppnRate: 12,
@@ -1918,18 +2287,37 @@ async function saveProductMaster() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (data.success) {
-      closeProductModal();
-      await renderProductMasterTable();
-      refreshProductDropdown();
-      alert('✅ Master Barang/Jasa berhasil disimpan!');
-    } else {
-      alert(`Gagal: ${data.message}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        console.log('Saved product to server');
+      }
     }
   } catch (err) {
-    console.error('Gagal menyimpan master produk:', err);
+    console.log('Products API offline, saving to localStorage');
   }
+
+  // Always update in-memory and localStorage
+  let prods = [];
+  try {
+    const raw = localStorage.getItem('IBC_PRODUCTS');
+    if (raw) prods = JSON.parse(raw);
+  } catch (e) {}
+  if (!prods || prods.length === 0) prods = [...DEFAULT_STATIC_PRODUCTS];
+
+  const idx = prods.findIndex(p => p.sku === payload.sku);
+  if (idx >= 0) {
+    prods[idx] = payload;
+  } else {
+    prods.push(payload);
+  }
+  localStorage.setItem('IBC_PRODUCTS', JSON.stringify(prods));
+  catalogProducts = prods;
+
+  closeProductModal();
+  await renderProductMasterTable();
+  refreshProductDropdown();
+  alert(`✅ Master ${payload.tipe} "${payload.name}" berhasil disimpan!`);
 }
 
 function refreshProductDropdown() {
