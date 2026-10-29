@@ -27,6 +27,21 @@ const DEFAULT_STATIC_SELLER = {
 
 const DEFAULT_STATIC_CUSTOMERS = [
   {
+    id: 'CUST-RETAIL-01',
+    tipeWp: 'ORANG_PRIBADI',
+    name: 'PELANGGAN UMUM / TOKO RETAIL (NON-PAJAK)',
+    pic: 'Kasir / Pembeli Langsung',
+    jabatan: 'Customer',
+    npwpOrNik: '-',
+    nitku: '-',
+    address: 'Kota Kudus & Sekitarnya',
+    email: '-',
+    phone: '-',
+    defaultKodeTransaksi: '01',
+    isPemotongPph23: false,
+    isNonPajak: true
+  },
+  {
     id: 'CUST-SUKUN-01',
     tipeWp: 'BADAN',
     name: 'PT. SUKUN WARTONO INDONESIA',
@@ -169,11 +184,12 @@ function terbilangRupiahClient(nominal) {
 }
 
 function calculateClientSide(items, options) {
-  const ppnRate = Number(options.ppnRate ?? 12);
-  const kodeTransaksi = options.kodeTransaksi || '01';
-  const useDppNilaiLain = Boolean(options.useDppNilaiLain || kodeTransaksi === '04');
-  const hasPph23 = Boolean(options.hasPph23 ?? false);
-  const pph23Rate = Number(options.pph23Rate ?? 2);
+  const isNonPajak = Boolean(options.isNonPajak ?? false);
+  const ppnRate = isNonPajak ? 0 : Number(options.ppnRate ?? 12);
+  const kodeTransaksi = isNonPajak ? '00' : (options.kodeTransaksi || '01');
+  const useDppNilaiLain = isNonPajak ? false : Boolean(options.useDppNilaiLain || kodeTransaksi === '04');
+  const hasPph23 = isNonPajak ? false : Boolean(options.hasPph23 ?? false);
+  const pph23Rate = isNonPajak ? 0 : Number(options.pph23Rate ?? 2);
 
   let totalBruto = 0;
   let totalDiskon = 0;
@@ -202,7 +218,7 @@ function calculateClientSide(items, options) {
 
   const subtotalDppDasar = Math.max(0, totalBruto - totalDiskon);
   let dppPajak = subtotalDppDasar;
-  if (useDppNilaiLain) {
+  if (!isNonPajak && useDppNilaiLain) {
     if (options.customDppNilaiLain && Number(options.customDppNilaiLain) > 0) {
       dppPajak = Number(options.customDppNilaiLain);
     } else {
@@ -210,15 +226,16 @@ function calculateClientSide(items, options) {
     }
   }
 
-  const totalPpn = Math.round(dppPajak * (ppnRate / 100));
+  const totalPpn = isNonPajak ? 0 : Math.round(dppPajak * (ppnRate / 100));
   const totalTagihan = subtotalDppDasar + totalPpn;
   let pph23Amount = 0;
-  if (hasPph23) {
+  if (!isNonPajak && hasPph23) {
     pph23Amount = Math.round(subtotalDppDasar * (pph23Rate / 100));
   }
   const totalDitransfer = totalTagihan - pph23Amount;
 
   return {
+    isNonPajak,
     kodeTransaksi,
     ppnRate,
     useDppNilaiLain,
@@ -229,13 +246,13 @@ function calculateClientSide(items, options) {
       totalBruto,
       totalDiskon,
       subtotalDpp: subtotalDppDasar,
-      totalDpp: dppPajak,
-      dppNilaiLain: useDppNilaiLain ? dppPajak : 0,
+      totalDpp: isNonPajak ? subtotalDppDasar : dppPajak,
+      dppNilaiLain: (useDppNilaiLain && !isNonPajak) ? dppPajak : 0,
       totalPpn,
-      totalTagihan,
+      totalTagihan: isNonPajak ? subtotalDppDasar : totalTagihan,
       pph23Amount,
-      totalDitransfer,
-      terbilang: terbilangRupiahClient(totalDitransfer).trim() + ' Rupiah'
+      totalDitransfer: isNonPajak ? subtotalDppDasar : totalDitransfer,
+      terbilang: terbilangRupiahClient(isNonPajak ? subtotalDppDasar : totalDitransfer).trim() + ' Rupiah'
     }
   };
 }
@@ -434,6 +451,9 @@ function initFormDefaults() {
   document.getElementById('chkDppNilaiLain').checked = true;
   document.getElementById('chkPph23').checked = true;
   document.getElementById('pph23Rate').value = '2';
+  if (typeof setTransactionMode === 'function') {
+    setTransactionMode('PAJAK');
+  }
 }
 
 function setupInitialSampleData() {
@@ -580,8 +600,70 @@ async function loadSellerProfile() {
   if (mgrTitle) mgrTitle.value = sData.managerTitle || 'Manager CV. Istana Barcode Computer';
 }
 
+
+let currentTransactionMode = 'PAJAK'; // 'PAJAK' | 'NON_PAJAK'
+
+function setTransactionMode(mode) {
+  currentTransactionMode = mode;
+  const btnPajak = document.getElementById('btnModePajak');
+  const btnNonPajak = document.getElementById('btnModeNonPajak');
+  const groupKode = document.getElementById('groupKodeTransaksi');
+  const taxBox = document.getElementById('taxOptionsBox');
+  const notice = document.getElementById('nonPajakNotice');
+  const summaryBadge = document.getElementById('summaryModeBadge');
+  const labelSubtotal = document.getElementById('labelSummarySubtotal');
+  const labelGrandTotal = document.getElementById('labelGrandTotalText');
+  const lineTagihan = document.getElementById('lineTotalTagihan');
+  const lineDppLain = document.getElementById('lineDppNilaiLain');
+  const linePpn = document.getElementById('linePpn');
+  const linePph = document.getElementById('linePph23');
+
+  if (mode === 'NON_PAJAK') {
+    if (btnPajak) btnPajak.classList.remove('active-pajak');
+    if (btnNonPajak) btnNonPajak.classList.add('active-nonpajak');
+    if (groupKode) groupKode.style.display = 'none';
+    if (taxBox) taxBox.style.display = 'none';
+    if (notice) notice.style.display = 'flex';
+    if (summaryBadge) {
+      summaryBadge.textContent = 'Nota Biasa (Non-Pajak)';
+      summaryBadge.className = 'badge badge-green';
+    }
+    if (labelSubtotal) labelSubtotal.textContent = 'Subtotal (Total Belanja):';
+    if (labelGrandTotal) labelGrandTotal.textContent = 'TOTAL PEMBAYARAN:';
+    if (lineTagihan) lineTagihan.style.display = 'none';
+    if (lineDppLain) lineDppLain.style.display = 'none';
+    if (linePpn) linePpn.style.display = 'none';
+    if (linePph) linePph.style.display = 'none';
+  } else {
+    if (btnPajak) btnPajak.classList.add('active-pajak');
+    if (btnNonPajak) btnNonPajak.classList.remove('active-nonpajak');
+    if (groupKode) groupKode.style.display = '';
+    if (taxBox) taxBox.style.display = '';
+    if (notice) notice.style.display = 'none';
+    if (summaryBadge) {
+      summaryBadge.textContent = 'Format Coretax Rekonsiliasi';
+      summaryBadge.className = 'badge badge-coretax';
+    }
+    if (labelSubtotal) labelSubtotal.textContent = 'Subtotal (DPP):';
+    if (labelGrandTotal) labelGrandTotal.textContent = 'TOTAL DITRANSFER / DIBAYARKAN:';
+    if (lineTagihan) lineTagihan.style.display = '';
+  }
+
+  triggerRecalculate();
+}
+
 function setupEventListeners() {
   document.getElementById('btnAddItem').addEventListener('click', () => addItemRow());
+    // Mode Transaksi: e-Faktur Coretax vs Nota Biasa
+    const btnPajak = document.getElementById('btnModePajak');
+    const btnNonPajak = document.getElementById('btnModeNonPajak');
+    if (btnPajak) {
+      btnPajak.addEventListener('click', () => setTransactionMode('PAJAK'));
+    }
+    if (btnNonPajak) {
+      btnNonPajak.addEventListener('click', () => setTransactionMode('NON_PAJAK'));
+    }
+
 
   // Pilih dari katalog cepat produk
   document.getElementById('quickCatalogSelect').addEventListener('change', (e) => {
@@ -598,7 +680,12 @@ function setupEventListeners() {
     if (!custId) return;
     const cust = sampleCustomers.find(c => c.id === custId);
     if (cust) {
-      document.getElementById('tipeWp').value = cust.tipeWp;
+        if (cust.isNonPajak) {
+          setTransactionMode('NON_PAJAK');
+        } else {
+          setTransactionMode('PAJAK');
+        }
+        document.getElementById('tipeWp').value = cust.tipeWp;
       document.getElementById('customerName').value = cust.name;
       document.getElementById('npwpOrNik').value = cust.npwpOrNik;
       document.getElementById('nitku').value = cust.nitku;
@@ -1035,6 +1122,7 @@ function getItemsFromTable() {
 }
 
 async function triggerRecalculate() {
+  const isNonPajak = (currentTransactionMode === 'NON_PAJAK');
   const items = getItemsFromTable();
   const ppnRate = Number(document.getElementById('ppnRate').value || 12);
   const kodeTransaksi = document.getElementById('kodeTransaksi').value;
@@ -1043,41 +1131,40 @@ async function triggerRecalculate() {
   const hasPph23 = document.getElementById('chkPph23').checked;
   const pph23Rate = Number(document.getElementById('pph23Rate').value || 2);
 
+  const calcOptions = {
+    isNonPajak,
+    ppnRate: isNonPajak ? 0 : ppnRate,
+    kodeTransaksi: isNonPajak ? '00' : kodeTransaksi,
+    useDppNilaiLain: isNonPajak ? false : useDppNilaiLain,
+    customDppNilaiLain: isNonPajak ? null : (customDppNilaiLain ? Number(customDppNilaiLain) : null),
+    hasPph23: isNonPajak ? false : hasPph23,
+    pph23Rate: isNonPajak ? 0 : pph23Rate
+  };
+
   try {
     const res = await fetch('/api/invoices/calculate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         items,
-        options: {
-          ppnRate,
-          kodeTransaksi,
-          useDppNilaiLain,
-          customDppNilaiLain: customDppNilaiLain ? Number(customDppNilaiLain) : null,
-          hasPph23,
-          pph23Rate
-        }
+        options: calcOptions
       })
     });
-
-    const data = await res.json();
-    if (data.success) {
-      currentTaxCalculation = data.data;
-      renderTaxSummary(data.data);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        currentTaxCalculation = data.data;
+        renderTaxSummary(data.data);
+        return;
+      }
     }
   } catch (err) {
     console.log('Kalkulasi API offline, fallback client math');
-    const clientCalc = calculateClientSide(items, {
-      ppnRate,
-      kodeTransaksi,
-      useDppNilaiLain,
-      customDppNilaiLain: customDppNilaiLain ? Number(customDppNilaiLain) : null,
-      hasPph23,
-      pph23Rate
-    });
-    currentTaxCalculation = clientCalc;
-    renderTaxSummary(clientCalc);
   }
+
+  const clientCalc = calculateClientSide(items, calcOptions);
+  currentTaxCalculation = clientCalc;
+  renderTaxSummary(clientCalc);
 }
 
 // Render RINGKASAN PEMBAYARAN Persis Analogi User
@@ -1089,41 +1176,51 @@ function renderTaxSummary(calc) {
     }
   });
 
-  const { summary, useDppNilaiLain, ppnRate, hasPph23, pph23Rate } = calc;
+  const { summary, useDppNilaiLain, ppnRate, hasPph23, pph23Rate, isNonPajak } = calc;
 
-  // 1. Subtotal (DPP)
   document.getElementById('summarySubtotalDpp').textContent = formatRupiah(summary.subtotalDpp);
 
-  // 2. DPP Nilai Lain & Label PPN
   const lineDppLain = document.getElementById('lineDppNilaiLain');
   const labelPpn = document.getElementById('labelPpnText');
-  if (useDppNilaiLain && summary.dppNilaiLain) {
-    lineDppLain.style.display = 'flex';
-    document.getElementById('summaryDppNilaiLain').textContent = formatRupiah(summary.dppNilaiLain);
-    labelPpn.textContent = `PPN (${ppnRate}% dari DPP Nilai Lain ${formatRupiah(summary.dppNilaiLain)}):`;
-  } else {
-    lineDppLain.style.display = 'none';
-    labelPpn.textContent = `PPN (${ppnRate}% dari DPP):`;
+  const linePpn = document.getElementById('linePpn');
+  const lineTotalTagihan = document.getElementById('lineTotalTagihan');
+  const linePph = document.getElementById('linePph23');
+  const labelPph = document.getElementById('labelPph23Text');
+
+  if (isNonPajak) {
+    if (lineDppLain) lineDppLain.style.display = 'none';
+    if (linePpn) linePpn.style.display = 'none';
+    if (lineTotalTagihan) lineTotalTagihan.style.display = 'none';
+    if (linePph) linePph.style.display = 'none';
+    document.getElementById('summaryTotalDitransfer').textContent = formatRupiah(summary.totalDitransfer);
+    document.getElementById('terbilangDisplay').textContent = summary.terbilang;
+    return;
   }
 
-  // 3. PPN
-  document.getElementById('summaryPpn').textContent = formatRupiah(summary.totalPpn);
+  // e-Faktur Coretax Mode
+  if (lineTotalTagihan) lineTotalTagihan.style.display = '';
 
-  // 4. Total Tagihan
+  if (useDppNilaiLain && summary.dppNilaiLain) {
+    if (lineDppLain) lineDppLain.style.display = 'flex';
+    document.getElementById('summaryDppNilaiLain').textContent = formatRupiah(summary.dppNilaiLain);
+    if (labelPpn) labelPpn.textContent = `PPN (${ppnRate}% dari DPP Nilai Lain ${formatRupiah(summary.dppNilaiLain)}):`;
+  } else {
+    if (lineDppLain) lineDppLain.style.display = 'none';
+    if (labelPpn) labelPpn.textContent = `PPN (${ppnRate}% dari DPP):`;
+  }
+
+  if (linePpn) linePpn.style.display = 'flex';
+  document.getElementById('summaryPpn').textContent = formatRupiah(summary.totalPpn);
   document.getElementById('summaryTotalTagihan').textContent = formatRupiah(summary.totalTagihan);
 
-  // 5. Potongan PPh 23
-  const linePph = document.getElementById('linePph23');
-  const labelPph23 = document.getElementById('labelPph23Text');
   if (hasPph23 && summary.pph23Amount > 0) {
-    linePph.style.display = 'flex';
-    labelPph23.textContent = `Potongan PPh Pasal 23 (${pph23Rate}% x ${formatRupiah(summary.subtotalDpp)}) - dipotong PT:`;
+    if (linePph) linePph.style.display = 'flex';
+    if (labelPph) labelPph.textContent = `Potongan PPh Pasal 23 (${pph23Rate}% x Subtotal) - dipotong PT:`;
     document.getElementById('summaryPph23').textContent = `(${formatRupiah(summary.pph23Amount)})`;
   } else {
-    linePph.style.display = 'none';
+    if (linePph) linePph.style.display = 'none';
   }
 
-  // 6. Total Ditransfer / Dibayarkan
   document.getElementById('summaryTotalDitransfer').textContent = formatRupiah(summary.totalDitransfer);
   document.getElementById('terbilangDisplay').textContent = summary.terbilang;
 }
@@ -1159,30 +1256,33 @@ async function saveCurrentInvoice() {
     return;
   }
 
-  const payload = {
-    invoiceNo,
-    invoiceDate,
-    customer: {
-      name: customerName,
-      pic: customerPic,
-      jabatan: customerJabatan,
-      tipeWp,
-      npwpOrNik,
-      nitku,
-      address: customerAddress,
-      phone: customerPhone,
-      email: customerEmail
-    },
-    items,
-    options: {
-      ppnRate,
-      kodeTransaksi,
-      useDppNilaiLain,
-      customDppNilaiLain: customDppNilaiLain ? Number(customDppNilaiLain) : null,
-      hasPph23,
-      pph23Rate
-    }
-  };
+  const isNonPajak = (currentTransactionMode === 'NON_PAJAK');
+    const payload = {
+      invoiceNo,
+      invoiceDate,
+      isNonPajak,
+      customer: {
+        name: customerName,
+        pic: customerPic,
+        jabatan: customerJabatan,
+        tipeWp,
+        npwpOrNik: npwpOrNik || (isNonPajak ? '-' : '0000000000000000'),
+        nitku: nitku || (isNonPajak ? '-' : '0000000000000000000000'),
+        address: customerAddress,
+        phone: customerPhone,
+        email: customerEmail
+      },
+      items,
+      options: {
+        isNonPajak,
+        ppnRate: isNonPajak ? 0 : ppnRate,
+        kodeTransaksi: isNonPajak ? '00' : kodeTransaksi,
+        useDppNilaiLain: isNonPajak ? false : useDppNilaiLain,
+        customDppNilaiLain: isNonPajak ? null : (customDppNilaiLain ? Number(customDppNilaiLain) : null),
+        hasPph23: isNonPajak ? false : hasPph23,
+        pph23Rate: isNonPajak ? 0 : pph23Rate
+      }
+    };
 
   try {
     const res = await fetch('/api/invoices/save', {
@@ -1309,7 +1409,7 @@ function openPrintModal() {
   const customerAddress = document.getElementById('customerAddress').value;
   const notes = document.getElementById('invoiceNotes').value;
 
-  const { summary, useDppNilaiLain, ppnRate, hasPph23, pph23Rate } = currentTaxCalculation;
+  const { summary, useDppNilaiLain, ppnRate, hasPph23, pph23Rate, isNonPajak } = currentTaxCalculation;
 
   // Render Data Perusahaan & Logo
   const sProfile = sellerProfileData || {};
@@ -1336,141 +1436,116 @@ function openPrintModal() {
     if (nitkuEl) nitkuEl.textContent = sProfile.nitku;
   }
 
-  // Logo Toko
-  const printLogoBox = document.getElementById('printLogoBox');
-  const printLogoImg = document.getElementById('printLogoImg');
-  if (sProfile.logoBase64) {
-    if (printLogoImg) printLogoImg.src = sProfile.logoBase64;
-    if (printLogoBox) printLogoBox.style.display = 'flex';
+  // Tipe & Badge Dokumen
+  const docMainTitle = document.getElementById('printDocMainTitle');
+  const docBadge = document.getElementById('printDocBadge');
+  if (isNonPajak) {
+    if (docMainTitle) docMainTitle.textContent = 'NOTA PENJUALAN';
+    if (docBadge) {
+      docBadge.textContent = 'BUKTI TRANSAKSI & PEMBAYARAN (NON-PAJAK)';
+      docBadge.className = 'doc-badge badge-green';
+    }
   } else {
-    if (printLogoBox) printLogoBox.style.display = 'none';
+    if (docMainTitle) docMainTitle.textContent = 'NOTA PENJUALAN';
+    if (docBadge) {
+      docBadge.textContent = 'DOKUMEN TRANSAKSI & FAKTUR';
+      docBadge.className = 'doc-badge';
+    }
   }
 
   // Meta Nota
-  document.getElementById('printInvNo').textContent = invoiceNo;
-  document.getElementById('printInvDate').textContent = invoiceDate;
-  const statusEl = document.getElementById('printInvStatus');
-  if (statusEl) {
-    statusEl.textContent = paymentStatus;
-    if (paymentStatus === 'LUNAS') {
-      statusEl.style.background = '#dcfce7';
-      statusEl.style.color = '#15803d';
-    } else {
-      statusEl.style.background = '#fef3c7';
-      statusEl.style.color = '#b45309';
-    }
-  }
+  document.getElementById('printInvNo').textContent = invoiceNo || '-';
+  document.getElementById('printInvDate').textContent = invoiceDate || '-';
+  document.getElementById('printInvStatus').textContent = paymentStatus || 'LUNAS';
 
-  // Customer Info Rapi
-  const customerPic = document.getElementById('customerPic') ? document.getElementById('customerPic').value.trim() : '';
-  const customerJabatan = document.getElementById('customerJabatan') ? document.getElementById('customerJabatan').value.trim() : '';
-  const customerPhone = document.getElementById('customerPhone') ? document.getElementById('customerPhone').value.trim() : '';
-
+  // Customer Card
   document.getElementById('printCustName').textContent = customerName || '-';
-  document.getElementById('printCustNpwp').textContent = npwpOrNik || '0000000000000000';
-  document.getElementById('printCustNitku').textContent = nitku || '-';
-  document.getElementById('printCustAddress').textContent = customerAddress || '-';
 
-  const picRow = document.getElementById('printCustPicRow');
+  // PIC Pembeli & Jabatan
+  const picVal = document.getElementById('customerPic') ? document.getElementById('customerPic').value.trim() : '';
+  const jabVal = document.getElementById('customerJabatan') ? document.getElementById('customerJabatan').value.trim() : '';
+  const printCustPicRow = document.getElementById('printCustPicRow');
   const printCustPic = document.getElementById('printCustPic');
-  if (customerPic || customerJabatan) {
-    if (picRow) picRow.style.display = 'flex';
-    if (printCustPic) {
-      if (customerPic && customerJabatan) {
-        printCustPic.textContent = `${customerPic} (${customerJabatan})`;
-      } else {
-        printCustPic.textContent = customerPic || customerJabatan;
-      }
-    }
+  if (picVal) {
+    if (printCustPicRow) printCustPicRow.style.display = 'flex';
+    if (printCustPic) printCustPic.textContent = picVal + (jabVal ? ` (${jabVal})` : '');
   } else {
-    if (picRow) picRow.style.display = 'none';
+    if (printCustPicRow) printCustPicRow.style.display = 'none';
   }
 
-  const phoneRow = document.getElementById('printCustPhoneRow');
-  const printCustPhone = document.getElementById('printCustPhone');
-  if (customerPhone) {
-    if (phoneRow) phoneRow.style.display = 'flex';
-    if (printCustPhone) printCustPhone.textContent = customerPhone;
+  document.getElementById('printCustAddress').textContent = customerAddress || '-';
+  const cPhone = document.getElementById('customerPhone')?.value;
+  const pPhone = document.getElementById('printCustPhone');
+  if (pPhone) pPhone.textContent = cPhone || '-';
+
+  // Tax identifiers di customer card
+  const printCustNpwpRow = document.getElementById('printCustNpwpRow');
+  const printCustNitkuRow = document.getElementById('printCustNitkuRow');
+  if (isNonPajak && (!npwpOrNik || npwpOrNik === '-' || npwpOrNik === '0000000000000000')) {
+    if (printCustNpwpRow) printCustNpwpRow.style.display = 'none';
+    if (printCustNitkuRow) printCustNitkuRow.style.display = 'none';
   } else {
-    if (phoneRow) phoneRow.style.display = 'none';
-  }
-
-  // Tanda Tangan Pembeli (Jika ada nama PIC / pembeli, langsung dicetak rapi)
-  const sigCustName = document.getElementById('printSigCustomerName');
-  if (sigCustName) {
-    if (customerPic) {
-      sigCustName.textContent = `( ${customerPic} )`;
-    } else if (customerName) {
-      sigCustName.textContent = `( ${customerName} )`;
-    } else {
-      sigCustName.textContent = '( .................................................... )';
+    if (printCustNpwpRow) {
+      printCustNpwpRow.style.display = 'flex';
+      document.getElementById('printCustNpwp').textContent = npwpOrNik || '-';
     }
-  }
-  const sigCustSub = document.getElementById('printSigCustomerSub');
-  if (sigCustSub) {
-    if (customerJabatan) {
-      sigCustSub.textContent = customerJabatan + (customerName ? ` - ${customerName}` : '');
-    } else if (customerName) {
-      sigCustSub.textContent = customerName;
-    } else {
-      sigCustSub.textContent = 'Pelanggan / Rekanan';
+    if (printCustNitkuRow) {
+      printCustNitkuRow.style.display = 'flex';
+      document.getElementById('printCustNitku').textContent = nitku || '-';
     }
   }
 
-  document.getElementById('printNotes').textContent = notes;
-  document.getElementById('printTerbilang').textContent = summary.terbilang;
+  document.getElementById('printNotes').textContent = notes || '-';
+  document.getElementById('printTerbilang').textContent = summary.terbilang || '-';
 
-  // Stempel & Tanda Tangan Manager Toko
-  const printStempelImg = document.getElementById('printStempelImg');
-  if (sProfile.stempelBase64) {
-    if (printStempelImg) {
-      printStempelImg.src = sProfile.stempelBase64;
-      printStempelImg.style.display = 'block';
-    }
-  } else {
-    if (printStempelImg) {
-      printStempelImg.src = '';
-      printStempelImg.style.display = 'none';
-    }
-  }
-
-  const sigMgrName = document.getElementById('printSigManagerName');
-  if (sigMgrName) {
-    sigMgrName.textContent = `( ${sProfile.managerName || 'Djohan Hutagalung, S.Kom.'} )`;
-  }
-  const sigMgrTitle = document.getElementById('printSigManagerTitle');
-  if (sigMgrTitle) {
-    sigMgrTitle.textContent = sProfile.managerTitle || 'Manager CV. Istana Barcode Computer';
-  }
-
-  // Print Summary Table
-  document.getElementById('printSubtotalDpp').textContent = formatRupiah(summary.subtotalDpp);
-
+  // Totals Table
+  const printLabelSubtotal = document.getElementById('printLabelSubtotal');
+  const printRowSubtotal = document.getElementById('printRowSubtotal');
   const printRowDppLain = document.getElementById('printRowDppLain');
-  const printLabelPpn = document.getElementById('printLabelPpn');
-  if (useDppNilaiLain && summary.dppNilaiLain) {
-    printRowDppLain.style.display = 'table-row';
-    document.getElementById('printDppLain').textContent = formatRupiah(summary.dppNilaiLain);
-    printLabelPpn.textContent = `PPN (${ppnRate}% dari DPP Nilai Lain ${formatRupiah(summary.dppNilaiLain)})`;
-  } else {
-    printRowDppLain.style.display = 'none';
-    printLabelPpn.textContent = `PPN (${ppnRate}% dari DPP)`;
-  }
-
-  document.getElementById('printPpn').textContent = formatRupiah(summary.totalPpn);
-  document.getElementById('printTotalTagihan').textContent = formatRupiah(summary.totalTagihan);
-
+  const printRowPpn = document.getElementById('printRowPpn');
+  const printRowTagihan = document.getElementById('printRowTagihan');
   const printRowPph = document.getElementById('printRowPph23');
-  const printLabelPph = document.getElementById('printLabelPph23');
-  if (hasPph23 && summary.pph23Amount > 0) {
-    printRowPph.style.display = 'table-row';
-    printLabelPph.textContent = `Potongan PPh Pasal 23 (${pph23Rate}% x ${formatRupiah(summary.subtotalDpp)}) - dipotong PT`;
-    document.getElementById('printPph23').textContent = `(${formatRupiah(summary.pph23Amount)})`;
-  } else {
-    printRowPph.style.display = 'none';
-  }
+  const printLabelGrandTotal = document.getElementById('printLabelGrandTotal');
 
-  document.getElementById('printTotalDitransfer').textContent = formatRupiah(summary.totalDitransfer);
+  if (isNonPajak) {
+    if (printLabelSubtotal) printLabelSubtotal.textContent = 'Total Belanja / Subtotal';
+    document.getElementById('printSubtotalDpp').textContent = formatRupiah(summary.subtotalDpp);
+    if (printRowDppLain) printRowDppLain.style.display = 'none';
+    if (printRowPpn) printRowPpn.style.display = 'none';
+    if (printRowTagihan) printRowTagihan.style.display = 'none';
+    if (printRowPph) printRowPph.style.display = 'none';
+    if (printLabelGrandTotal) printLabelGrandTotal.innerHTML = '<strong>TOTAL PEMBAYARAN</strong>';
+    document.getElementById('printTotalDitransfer').textContent = formatRupiah(summary.totalDitransfer);
+  } else {
+    if (printLabelSubtotal) printLabelSubtotal.textContent = 'Subtotal (DPP)';
+    document.getElementById('printSubtotalDpp').textContent = formatRupiah(summary.subtotalDpp);
+    if (useDppNilaiLain && summary.dppNilaiLain) {
+      if (printRowDppLain) printRowDppLain.style.display = 'table-row';
+      document.getElementById('printDppLain').textContent = formatRupiah(summary.dppNilaiLain);
+      const printLabelPpn = document.getElementById('printLabelPpn');
+      if (printLabelPpn) printLabelPpn.textContent = `PPN (${ppnRate}% dari DPP Nilai Lain ${formatRupiah(summary.dppNilaiLain)})`;
+    } else {
+      if (printRowDppLain) printRowDppLain.style.display = 'none';
+      const printLabelPpn = document.getElementById('printLabelPpn');
+      if (printLabelPpn) printLabelPpn.textContent = `PPN (${ppnRate}% dari DPP)`;
+    }
+    if (printRowPpn) printRowPpn.style.display = 'table-row';
+    document.getElementById('printPpn').textContent = formatRupiah(summary.totalPpn);
+
+    if (printRowTagihan) printRowTagihan.style.display = 'table-row';
+    document.getElementById('printTotalTagihan').textContent = formatRupiah(summary.totalTagihan);
+
+    if (hasPph23 && summary.pph23Amount > 0) {
+      if (printRowPph) printRowPph.style.display = 'table-row';
+      const printLabelPph = document.getElementById('printLabelPph23');
+      if (printLabelPph) printLabelPph.textContent = `Potongan PPh Pasal 23 (${pph23Rate}% x ${formatRupiah(summary.subtotalDpp)}) - dipotong PT`;
+      document.getElementById('printPph23').textContent = `(${formatRupiah(summary.pph23Amount)})`;
+    } else {
+      if (printRowPph) printRowPph.style.display = 'none';
+    }
+    if (printLabelGrandTotal) printLabelGrandTotal.innerHTML = '<strong>TOTAL DITRANSFER / DIBAYARKAN</strong>';
+    document.getElementById('printTotalDitransfer').textContent = formatRupiah(summary.totalDitransfer);
+  }
 
   // Render Baris Cetak
   const tbody = document.getElementById('printItemsBody');
@@ -1487,6 +1562,24 @@ function openPrintModal() {
     `;
     tbody.appendChild(tr);
   });
+
+  // Tanda tangan
+  const sigCust = document.getElementById('printSigCustomer');
+  if (sigCust) sigCust.textContent = picVal ? picVal : (customerName || 'Pembeli');
+
+  const sigCustSub = document.getElementById('printSigCustomerSub');
+  if (sigCustSub) {
+    if (picVal && customerName) {
+      sigCustSub.textContent = (jabVal ? jabVal + ' - ' : '') + customerName;
+    } else {
+      sigCustSub.textContent = customerName || 'Pelanggan';
+    }
+  }
+
+  const sigMgr = document.getElementById('printSigManager');
+  if (sigMgr) sigMgr.textContent = sProfile.managerName || 'Djohan Hutagalung, S.Kom.';
+  const sigTitle = document.getElementById('printSigTitle');
+  if (sigTitle) sigTitle.textContent = sProfile.managerTitle || 'Manager CV. Istana Barcode Computer';
 
   document.getElementById('printModal').classList.add('show');
 }
@@ -1527,7 +1620,7 @@ async function loadInvoiceHistory() {
     const summary = inv.taxCalculation?.summary || {};
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><strong class="input-mono">${inv.invoiceNo}</strong></td>
+      <td><strong class="input-mono">${inv.invoiceNo}</strong><br>${(inv.isNonPajak || inv.options?.isNonPajak || inv.taxCalculation?.isNonPajak) ? '<span class="badge-mini badge-green">Nota Biasa</span>' : '<span class="badge-mini badge-blue">Coretax</span>'}</td>
       <td>${inv.invoiceDate}</td>
       <td><strong>${inv.customer?.name || '-'}</strong>${inv.customer?.pic ? `<br><small style="color: #2563eb;">👤 Up: ${inv.customer.pic}</small>` : ''}</td>
       <td class="text-right">${formatRupiah(summary.subtotalDpp)}</td>

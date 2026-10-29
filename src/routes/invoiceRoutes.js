@@ -74,8 +74,9 @@ router.post('/calculate', (req, res) => {
 
 router.post('/save', (req, res) => {
   const { invoiceNo, invoiceDate, customer, items, options } = req.body;
+  const isNonPajak = Boolean(options?.isNonPajak);
 
-  const validation = validateCustomerData(customer);
+  const validation = validateCustomerData(customer, isNonPajak);
   if (!validation.isValid) {
     return res.status(400).json({ success: false, errors: validation.errors });
   }
@@ -85,6 +86,7 @@ router.post('/save', (req, res) => {
   const invoiceRecord = {
     invoiceNo: invoiceNo || `INV-IBC-${Date.now().toString().slice(-6)}`,
     invoiceDate: invoiceDate || new Date().toISOString().split('T')[0],
+    isNonPajak,
     customer: validation.sanitized,
     options: options || {},
     items,

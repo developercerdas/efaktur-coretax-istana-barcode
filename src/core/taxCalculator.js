@@ -4,10 +4,8 @@
  * untuk CV. Istana Barcode Computer.
  * 
  * Mendukung:
- * - DPP Normal & DPP Nilai Lain (Kode Transaksi 04)
- * - PPN 11% / 12%
- * - Potongan PPh Pasal 23 (2%) / PPh 22 / Withholding Tax oleh PT
- * - Kalkulasi Total Tagihan & Total Ditransfer / Dibayarkan
+ * - Mode Pajak Coretax: DPP Normal & DPP Nilai Lain (Kode Transaksi 04), PPN 11%/12%, PPh 23
+ * - Mode Nota Biasa: Non-Pajak / Retail / Toko (PPN 0%, PPh 23 0%, total murni subtotal)
  */
 
 function terbilangRupiah(nominal) {
@@ -45,6 +43,7 @@ function terbilangRupiah(nominal) {
  * 
  * @param {Array} items - Daftar barang [{ name, sku, qty, unitPrice, discount }]
  * @param {Object} options - {
+ *    isNonPajak: boolean, // Mode Nota Biasa (Tanpa PPN & PPh 23)
  *    ppnRate: 11 | 12,
  *    isPpnIncluded: false,
  *    kodeTransaksi: '01' | '04',
@@ -55,12 +54,13 @@ function terbilangRupiah(nominal) {
  * }
  */
 function calculateInvoice(items = [], options = {}) {
-  const ppnRate = Number(options.ppnRate ?? 12);
-  const isPpnIncluded = Boolean(options.isPpnIncluded ?? false);
-  const kodeTransaksi = options.kodeTransaksi || '01';
-  const useDppNilaiLain = Boolean(options.useDppNilaiLain || kodeTransaksi === '04');
-  const hasPph23 = Boolean(options.hasPph23 ?? false);
-  const pph23Rate = Number(options.pph23Rate ?? 2);
+  const isNonPajak = Boolean(options.isNonPajak ?? false);
+  const ppnRate = isNonPajak ? 0 : Number(options.ppnRate ?? 12);
+  const isPpnIncluded = isNonPajak ? false : Boolean(options.isPpnIncluded ?? false);
+  const kodeTransaksi = isNonPajak ? '00' : (options.kodeTransaksi || '01');
+  const useDppNilaiLain = isNonPajak ? false : Boolean(options.useDppNilaiLain || kodeTransaksi === '04');
+  const hasPph23 = isNonPajak ? false : Boolean(options.hasPph23 ?? false);
+  const pph23Rate = isNonPajak ? 0 : Number(options.pph23Rate ?? 2);
 
   let totalBruto = 0;
   let totalDiskon = 0;
@@ -94,32 +94,31 @@ function calculateInvoice(items = [], options = {}) {
   const subtotalDppDasar = Math.max(0, totalBruto - totalDiskon);
 
   // Penentuan DPP untuk perhitungan PPN Coretax:
-  // Jika menggunakan DPP Nilai Lain (Kode 04):
-  // Bisa menggunakan input nominal langsung atau rasio formula (misal 11/12)
   let dppPajak = subtotalDppDasar;
-  if (useDppNilaiLain) {
+  if (!isNonPajak && useDppNilaiLain) {
     if (options.customDppNilaiLain && Number(options.customDppNilaiLain) > 0) {
       dppPajak = Number(options.customDppNilaiLain);
     } else {
       // Default rasio DPP Nilai Lain penyesuaian tarif efektif: 11/12
       dppPajak = Math.round(subtotalDppDasar * (11 / 12));
     }
-  } else if (isPpnIncluded) {
+  } else if (!isNonPajak && isPpnIncluded) {
     dppPajak = Math.round(subtotalDppDasar / (1 + (ppnRate / 100)));
   }
 
-  // PPN Terutang dihitung dari DPP Pajak (DPP Nilai Lain jika aktif)
-  const totalPpn = isPpnIncluded && !useDppNilaiLain
-    ? subtotalDppDasar - dppPajak
-    : Math.round(dppPajak * (ppnRate / 100));
+  // PPN Terutang (0 jika Nota Biasa / Non-Pajak)
+  const totalPpn = isNonPajak ? 0 : (
+    isPpnIncluded && !useDppNilaiLain
+      ? subtotalDppDasar - dppPajak
+      : Math.round(dppPajak * (ppnRate / 100))
+  );
 
   // Total Tagihan (Invoice Total): Subtotal DPP + PPN
   const totalTagihan = subtotalDppDasar + totalPpn;
 
-  // Potongan PPh Pasal 23 (Dipotong oleh PT pembeli)
+  // Potongan PPh Pasal 23 (0 jika Nota Biasa / Non-Pajak)
   let pph23Amount = 0;
-  if (hasPph23) {
-    // PPh 23 dihitung dari Subtotal Jasa / DPP Dasar
+  if (!isNonPajak && hasPph23) {
     pph23Amount = Math.round(subtotalDppDasar * (pph23Rate / 100));
   }
 
@@ -129,6 +128,7 @@ function calculateInvoice(items = [], options = {}) {
   const nominalTerbilang = terbilangRupiah(totalDitransfer).trim() + ' Rupiah';
 
   return {
+    isNonPajak,
     kodeTransaksi,
     ppnRate,
     isPpnIncluded,
@@ -140,8 +140,8 @@ function calculateInvoice(items = [], options = {}) {
       totalBruto,
       totalDiskon,
       subtotalDpp: subtotalDppDasar,
-      dppNilaiLain: useDppNilaiLain ? dppPajak : null,
-      totalDpp: dppPajak,
+      dppNilaiLain: (!isNonPajak && useDppNilaiLain) ? dppPajak : null,
+      totalDpp: isNonPajak ? subtotalDppDasar : dppPajak,
       totalPpn,
       totalTagihan,
       pph23Rate,

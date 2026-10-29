@@ -42,24 +42,28 @@ function normalizeNITKU(nitku, npwp16) {
 
 /**
  * Validasi keseluruhan input Nota / Faktur Pajak Coretax
+ * @param {Object} customer
+ * @param {boolean} isNonPajak - Jika true, NPWP 16 tidak diwajibkan (nota toko biasa)
  */
-function validateCustomerData(customer = {}) {
+function validateCustomerData(customer = {}, isNonPajak = false) {
   const errors = [];
   const cleanId = sanitizeDigits(customer.npwpOrNik);
 
   if (!customer.name || customer.name.trim().length === 0) {
-    errors.push('Nama pembeli / perusahaan wajib diisi.');
+    errors.push('Nama pembeli / perusahaan / toko wajib diisi.');
   }
 
-  const isBadan = customer.tipeWp === 'BADAN';
-  if (isBadan) {
-    if (cleanId.length !== 16) {
-      errors.push('NPWP Badan untuk Coretax wajib 16 digit angka.');
-    }
-  } else {
-    // Orang pribadi / Umum
-    if (cleanId && cleanId.length !== 16 && cleanId !== '0000000000000000') {
-      errors.push('Identitas pembeli (NPWP 16 / NIK) harus 16 digit angka.');
+  if (!isNonPajak) {
+    const isBadan = customer.tipeWp === 'BADAN';
+    if (isBadan) {
+      if (cleanId.length !== 16) {
+        errors.push('NPWP Badan untuk Coretax wajib 16 digit angka.');
+      }
+    } else {
+      // Orang pribadi / Umum
+      if (cleanId && cleanId.length !== 16 && cleanId !== '0000000000000000') {
+        errors.push('Identitas pembeli (NPWP 16 / NIK) harus 16 digit angka.');
+      }
     }
   }
 
@@ -68,8 +72,8 @@ function validateCustomerData(customer = {}) {
     errors,
     sanitized: {
       ...customer,
-      npwpOrNik: cleanId || '0000000000000000',
-      nitku: normalizeNITKU(customer.nitku, cleanId)
+      npwpOrNik: cleanId || (isNonPajak ? '-' : '0000000000000000'),
+      nitku: isNonPajak ? '-' : normalizeNITKU(customer.nitku, cleanId)
     }
   };
 }

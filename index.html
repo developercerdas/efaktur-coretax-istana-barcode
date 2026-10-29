@@ -61,6 +61,32 @@
               <h2>1. Informasi Nota Penjualan</h2>
             </div>
             <div class="card-body">
+              <!-- Pilihan Format / Jenis Transaksi: e-Faktur Coretax vs Nota Biasa -->
+              <div class="transaction-mode-card">
+                <div class="mode-header">PILIH FORMAT / JENIS TRANSAKSI:</div>
+                <div class="mode-buttons-row">
+                  <button type="button" class="btn-mode-toggle active-pajak" id="btnModePajak" data-mode="PAJAK">
+                    <span class="mode-icon">🏛️</span>
+                    <div class="mode-desc">
+                      <strong>e-Faktur Coretax</strong>
+                      <small>Dengan PPN 12% & PPh 23 (Untuk Rekanan PT / PKP)</small>
+                    </div>
+                  </button>
+                  <button type="button" class="btn-mode-toggle" id="btnModeNonPajak" data-mode="NON_PAJAK">
+                    <span class="mode-icon">🧾</span>
+                    <div class="mode-desc">
+                      <strong>Nota Biasa / Toko</strong>
+                      <small>Tanpa Pajak / Non-PPN (Untuk Toko, Retail, Umum)</small>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Banner Pemberitahuan Mode Nota Biasa -->
+              <div id="nonPajakNotice" class="alert-info-box mb-3" style="display:none;">
+                <span>🧾 <strong>Mode Nota Biasa (Non-Pajak) Aktif:</strong> Transaksi dihitung murni dari harga barang/jasa tanpa tambahan PPN atau potongan PPh 23. Judul cetak adalah Nota Penjualan Toko.</span>
+              </div>
+
               <div class="form-row">
                 <div class="form-group flex-1">
                   <label for="invoiceNo">Nomor Nota / Invoice</label>
@@ -72,8 +98,8 @@
                 </div>
               </div>
 
-              <div class="form-row">
-                <div class="form-group flex-1">
+              <div class="form-row" id="rowKodeTransaksiDanStatus">
+                <div class="form-group flex-1" id="groupKodeTransaksi">
                   <label for="kodeTransaksi">Kode Transaksi Coretax</label>
                   <select id="kodeTransaksi">
                     <option value="01">01 - Penyerahan BKP/JKP Umum</option>
@@ -93,7 +119,7 @@
               </div>
 
               <!-- Pengaturan Pajak Coretax & Nilai Lain -->
-              <div class="tax-options-box">
+              <div class="tax-options-box" id="taxOptionsBox">
                 <div class="form-row">
                   <div class="form-group flex-1">
                     <label for="ppnRate">Tarif PPN</label>
@@ -289,11 +315,11 @@
           <div class="card summary-card">
             <div class="card-header flex-between">
               <h2>RINGKASAN PEMBAYARAN</h2>
-              <span class="badge badge-coretax">Format Coretax Rekonsiliasi</span>
+              <span class="badge badge-coretax" id="summaryModeBadge">Format Coretax Rekonsiliasi</span>
             </div>
             <div class="card-body summary-body">
               <div class="summary-line">
-                <span>Subtotal (DPP):</span>
+                <span id="labelSummarySubtotal">Subtotal (DPP):</span>
                 <strong id="summarySubtotalDpp">Rp 75.000.000,00</strong>
               </div>
               
@@ -302,12 +328,12 @@
                 <strong id="summaryDppNilaiLain" class="text-primary">Rp 68.750.000,00</strong>
               </div>
 
-              <div class="summary-line">
+              <div class="summary-line" id="linePpn">
                 <span id="labelPpnText">PPN (12% dari DPP Nilai Lain):</span>
                 <strong id="summaryPpn" class="text-success">Rp 8.250.000,00</strong>
               </div>
 
-              <div class="summary-line invoice-total-line">
+              <div class="summary-line invoice-total-line" id="lineTotalTagihan">
                 <span>Total Tagihan:</span>
                 <strong id="summaryTotalTagihan">Rp 83.250.000,00</strong>
               </div>
@@ -318,7 +344,7 @@
               </div>
 
               <div class="summary-line grand-total-line">
-                <span>TOTAL DITRANSFER / DIBAYARKAN:</span>
+                <span id="labelGrandTotalText">TOTAL DITRANSFER / DIBAYARKAN:</span>
                 <strong id="summaryTotalDitransfer">Rp 81.750.000,00</strong>
               </div>
             </div>
@@ -973,8 +999,8 @@
                 </div>
               </div>
               <div class="invoice-title-print">
-                <h1>NOTA PENJUALAN</h1>
-                <p class="doc-badge">DOKUMEN TRANSAKSI & FAKTUR</p>
+                <h1 id="printDocMainTitle">NOTA PENJUALAN</h1>
+                <p class="doc-badge" id="printDocBadge">DOKUMEN TRANSAKSI & FAKTUR</p>
                 <div class="meta-card">
                   <div class="meta-row"><span class="m-label">No. Nota</span><span class="m-sep">:</span><strong id="printInvNo" class="input-mono m-val">-</strong></div>
                   <div class="meta-row"><span class="m-label">Tanggal</span><span class="m-sep">:</span><span id="printInvDate" class="m-val">-</span></div>
@@ -1004,13 +1030,13 @@
                   <span id="printCustAddress" class="c-val">-</span>
                 </div>
               </div>
-              <div class="cust-info-col-right">
-                <div class="cust-data-row">
+              <div class="cust-info-col-right" id="printCustTaxCol">
+                <div class="cust-data-row" id="printCustNpwpRow">
                   <span class="c-label">NPWP (16) / NIK</span>
                   <span class="c-sep">:</span>
                   <strong id="printCustNpwp" class="input-mono c-val">-</strong>
                 </div>
-                <div class="cust-data-row">
+                <div class="cust-data-row" id="printCustNitkuRow">
                   <span class="c-label">NITKU (22 Digit)</span>
                   <span class="c-sep">:</span>
                   <span id="printCustNitku" class="input-mono c-val">-</span>
@@ -1057,8 +1083,8 @@
 
               <div class="print-right-block">
                 <table class="totals-table">
-                  <tr>
-                    <td class="tot-label">Subtotal (DPP)</td>
+                  <tr id="printRowSubtotal">
+                    <td class="tot-label" id="printLabelSubtotal">Subtotal (DPP)</td>
                     <td class="tot-sep">:</td>
                     <td class="text-right tot-val" id="printSubtotalDpp">Rp 75.000.000,00</td>
                   </tr>
@@ -1067,13 +1093,13 @@
                     <td class="tot-sep">:</td>
                     <td class="text-right tot-val text-muted" id="printDppLain">Rp 68.750.000,00</td>
                   </tr>
-                  <tr>
+                  <tr id="printRowPpn">
                     <td class="tot-label" id="printLabelPpn">PPN (12% dari DPP Nilai Lain)</td>
                     <td class="tot-sep">:</td>
                     <td class="text-right tot-val text-success" id="printPpn">Rp 8.250.000,00</td>
                   </tr>
-                  <tr class="tagihan-total-row">
-                    <td class="tot-label"><strong>Total Tagihan</strong></td>
+                  <tr class="tagihan-total-row" id="printRowTagihan">
+                    <td class="tot-label" id="printLabelTagihan"><strong>Total Tagihan</strong></td>
                     <td class="tot-sep">:</td>
                     <td class="text-right tot-val"><strong id="printTotalTagihan">Rp 83.250.000,00</strong></td>
                   </tr>
@@ -1082,8 +1108,8 @@
                     <td class="tot-sep">:</td>
                     <td class="text-right tot-val text-danger" id="printPph23">(Rp 1.500.000,00)</td>
                   </tr>
-                  <tr class="grand-total-row">
-                    <td class="tot-label"><strong>TOTAL DITRANSFER / DIBAYARKAN</strong></td>
+                  <tr class="grand-total-row" id="printRowGrandTotal">
+                    <td class="tot-label" id="printLabelGrandTotal"><strong>TOTAL DITRANSFER / DIBAYARKAN</strong></td>
                     <td class="tot-sep">:</td>
                     <td class="text-right tot-val"><strong id="printTotalDitransfer">Rp 81.750.000,00</strong></td>
                   </tr>

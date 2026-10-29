@@ -69,6 +69,25 @@ test('Perhitungan Otomatis Proporsi DPP Nilai Lain (11/12) jika custom nominal t
   assert.equal(result.summary.totalDitransfer, 81750000);
 });
 
+test('Perhitungan Nota Biasa Tanpa Pajak (isNonPajak = true)', () => {
+  const items = [
+    { sku: 'BCS-2D-HW1', name: 'Honeywell Barcode Scanner', qty: 2, unitPrice: 1850000, discount: 100000 }
+  ];
+
+  const result = calculateInvoice(items, {
+    isNonPajak: true
+  });
+
+  // Gross = 3.700.000, Diskon = 100.000 -> Subtotal = 3.600.000
+  assert.equal(result.isNonPajak, true);
+  assert.equal(result.summary.subtotalDpp, 3600000);
+  assert.equal(result.summary.totalPpn, 0);
+  assert.equal(result.summary.pph23Amount, 0);
+  assert.equal(result.summary.totalTagihan, 3600000);
+  assert.equal(result.summary.totalDitransfer, 3600000);
+  assert.equal(result.summary.dppNilaiLain, null);
+});
+
 test('Normalisasi NITKU 22 Digit Coretax', () => {
   const npwp16 = '0123456789012345';
   const nitkuDefault = normalizeNITKU('', npwp16);
