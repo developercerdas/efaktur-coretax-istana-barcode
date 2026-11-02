@@ -647,6 +647,7 @@ window.viewHistoryInvoice = function(invoiceNoEncoded) {
     alert('Data nota tidak ditemukan.');
     return;
   }
+  savedInvoiceData = inv;
   currentTaxCalculation = inv.taxCalculation;
   currentTransactionMode = (inv.isNonPajak || inv.options?.isNonPajak || inv.taxCalculation?.isNonPajak) ? 'NON_PAJAK' : 'PAJAK';
   document.getElementById('invoiceNo').value = inv.invoiceNo;
@@ -1739,7 +1740,31 @@ function openPrintModal() {
   const invoiceNo = document.getElementById('invoiceNo').value;
   const invoiceDate = document.getElementById('invoiceDate').value;
   const paymentStatus = document.getElementById('paymentStatus').value;
-  const customerName = document.getElementById('customerName').value;
+  let customerName = document.getElementById('customerName')?.value?.trim();
+
+  // Auto-recovery jika nama pembeli belum terisi di input
+  if (!customerName && savedInvoiceData?.customer?.name) {
+    customerName = savedInvoiceData.customer.name;
+    if (document.getElementById('customerName')) document.getElementById('customerName').value = customerName;
+  }
+  if (!customerName) {
+    const quickSel = document.getElementById('quickCustomerSelect');
+    if (quickSel && quickSel.value) {
+      customerName = quickSel.selectedOptions[0]?.text || '';
+      if (document.getElementById('customerName')) document.getElementById('customerName').value = customerName;
+    }
+  }
+
+  if (!customerName) {
+    alert('Nama Pembeli / Lawan Transaksi belum diisi! Silakan isi Nama Perusahaan / Pembeli atau pilih dari dropdown Lawan Transaksi terlebih dahulu.');
+    const cInput = document.getElementById('customerName');
+    if (cInput) {
+      cInput.focus();
+      cInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
+
   const npwpOrNik = document.getElementById('npwpOrNik').value;
   const nitku = document.getElementById('nitku').value;
   const customerAddress = document.getElementById('customerAddress').value;
@@ -1900,21 +1925,24 @@ function openPrintModal() {
   });
 
   // Tanda tangan
-  const sigCust = document.getElementById('printSigCustomer');
-  if (sigCust) sigCust.textContent = picVal ? picVal : (customerName || 'Pembeli');
+  const sigCust = document.getElementById('printSigCustomerName') || document.getElementById('printSigCustomer');
+  if (sigCust) {
+    const displayName = picVal ? picVal : customerName;
+    sigCust.textContent = `( ${displayName} )`;
+  }
 
   const sigCustSub = document.getElementById('printSigCustomerSub');
   if (sigCustSub) {
     if (picVal && customerName) {
       sigCustSub.textContent = (jabVal ? jabVal + ' - ' : '') + customerName;
     } else {
-      sigCustSub.textContent = customerName || 'Pelanggan';
+      sigCustSub.textContent = customerName || 'Pelanggan / Rekanan';
     }
   }
 
-  const sigMgr = document.getElementById('printSigManager');
-  if (sigMgr) sigMgr.textContent = sProfile.managerName || 'Djohan Hutagalung, S.Kom.';
-  const sigTitle = document.getElementById('printSigTitle');
+  const sigMgr = document.getElementById('printSigManagerName') || document.getElementById('printSigManager');
+  if (sigMgr) sigMgr.textContent = `( ${sProfile.managerName || 'Djohan Hutagalung, S.Kom.'} )`;
+  const sigTitle = document.getElementById('printSigManagerTitle') || document.getElementById('printSigTitle');
   if (sigTitle) sigTitle.textContent = sProfile.managerTitle || 'Manager CV. Istana Barcode Computer';
 
   document.getElementById('printModal').classList.add('show');

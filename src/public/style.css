@@ -914,6 +914,21 @@ table {
   margin-bottom: 16px;
 }
 
+.cust-card-header {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  font-weight: 700;
+  color: #1e3a8a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #cbd5e1;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .cust-data-row {
   display: flex;
   align-items: flex-start;
