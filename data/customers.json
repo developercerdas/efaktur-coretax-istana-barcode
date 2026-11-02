@@ -1,5 +1,20 @@
 [
   {
+    "id": "CUST-RETAIL-01",
+    "tipeWp": "ORANG_PRIBADI",
+    "name": "PELANGGAN UMUM / TOKO RETAIL (NON-PAJAK)",
+    "pic": "Kasir / Pembeli Langsung",
+    "jabatan": "Customer",
+    "npwpOrNik": "-",
+    "nitku": "-",
+    "address": "Kota Kudus & Sekitarnya",
+    "email": "-",
+    "phone": "-",
+    "defaultKodeTransaksi": "00",
+    "isPemotongPph23": false,
+    "isNonPajak": true
+  },
+  {
     "id": "CUST-001",
     "tipeWp": "BADAN",
     "name": "PT. SUMBER ALFARIA RETAIL TBK",

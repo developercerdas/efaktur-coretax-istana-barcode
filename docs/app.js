@@ -37,7 +37,7 @@ const DEFAULT_STATIC_CUSTOMERS = [
     address: 'Kota Kudus & Sekitarnya',
     email: '-',
     phone: '-',
-    defaultKodeTransaksi: '01',
+    defaultKodeTransaksi: '00',
     isPemotongPph23: false,
     isNonPajak: true
   },
@@ -53,7 +53,8 @@ const DEFAULT_STATIC_CUSTOMERS = [
     email: 'hrd@sukun.co.id',
     phone: '0291-432xxx',
     defaultKodeTransaksi: '04',
-    isPemotongPph23: true
+    isPemotongPph23: true,
+    isNonPajak: false
   },
   {
     id: 'CUST-001',
@@ -67,7 +68,8 @@ const DEFAULT_STATIC_CUSTOMERS = [
     email: 'tax.ap@alfamart.co.id',
     phone: '021-55755999',
     defaultKodeTransaksi: '01',
-    isPemotongPph23: true
+    isPemotongPph23: true,
+    isNonPajak: false
   },
   {
     id: 'CUST-002',
@@ -81,7 +83,23 @@ const DEFAULT_STATIC_CUSTOMERS = [
     email: 'finance.tax@multiretail.co.id',
     phone: '021-46801234',
     defaultKodeTransaksi: '04',
-    isPemotongPph23: true
+    isPemotongPph23: true,
+    isNonPajak: false
+  },
+  {
+    id: 'CUST-003',
+    tipeWp: 'BADAN',
+    name: 'CV. JAYA MAKMUR MINIMARKET',
+    pic: 'Bagian Pembelian / Finance',
+    jabatan: 'Finance Staff',
+    npwpOrNik: '0356789012345000',
+    nitku: '0356789012345000000000',
+    address: 'Jl. Raya Darmo Permai No. 88, Surabaya, Jawa Timur 60189',
+    email: 'jayamakmur.pos@gmail.com',
+    phone: '031-7341234',
+    defaultKodeTransaksi: '01',
+    isPemotongPph23: false,
+    isNonPajak: false
   },
   {
     id: 'CUST-004',
@@ -95,32 +113,42 @@ const DEFAULT_STATIC_CUSTOMERS = [
     email: 'hendro.kasir@yahoo.com',
     phone: '0813-8899-7711',
     defaultKodeTransaksi: '01',
-    isPemotongPph23: false
+    isPemotongPph23: false,
+    isNonPajak: false
+  },
+  {
+    id: 'CUST-005',
+    tipeWp: 'BADAN',
+    name: 'PT. POS LOGISTIK INDONESIA (PERSERO)',
+    pic: 'Bagian Pembelian / Finance',
+    jabatan: 'Finance Staff',
+    npwpOrNik: '0100055540510000',
+    nitku: '0100055540510000000000',
+    address: 'Gedung Pos Ibukota Lt. 2, Jl. Lapangan Banteng Utara No. 1, Jakarta Pusat',
+    email: 'perpajakan@poslogistics.co.id',
+    phone: '021-3844567',
+    defaultKodeTransaksi: '03',
+    isPemotongPph23: true,
+    isNonPajak: false
   }
 ];
 
 const DEFAULT_STATIC_PRODUCTS = [
+  // Jasa & Software (IT Solution)
   {
-    sku: 'SRV-PAYROLL-01',
+    sku: 'SRV-TRAIN-01',
     tipe: 'Jasa',
     kategori: 'Jasa',
     kodeCoretax: '000000 - Jasa',
-    name: 'Pengembangan Sistem SIM Payroll Terintegrasi (Sekali bayar)',
+    name: 'Jasa Training & Implementasi (Sekali bayar)',
     satuan: 'Paket',
-    unitPrice: 60000000,
+    unitPrice: 1500000,
     isDppNilaiLain: true,
-    isObjekPph23: true
-  },
-  {
-    sku: 'SRV-WAGW-01',
-    tipe: 'Jasa',
-    kategori: 'Jasa',
-    kodeCoretax: '000000 - Jasa',
-    name: 'Integrasi & Setup WhatsApp Gateway (Internal) (Sekali bayar)',
-    satuan: 'Paket',
-    unitPrice: 9500000,
-    isDppNilaiLain: true,
-    isObjekPph23: true
+    dppNilaiLainCustom: 1375000,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: true,
+    pph23Rate: 2
   },
   {
     sku: 'SRV-CLOUD-01',
@@ -131,18 +159,116 @@ const DEFAULT_STATIC_PRODUCTS = [
     satuan: 'Bulan',
     unitPrice: 4000000,
     isDppNilaiLain: true,
-    isObjekPph23: true
+    dppNilaiLainCustom: 3666667,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: true,
+    pph23Rate: 2
   },
   {
-    sku: 'SRV-TRAIN-01',
+    sku: 'SRV-WAGW-01',
     tipe: 'Jasa',
     kategori: 'Jasa',
     kodeCoretax: '000000 - Jasa',
-    name: 'Jasa Training & Implementasi (Sekali bayar)',
+    name: 'Integrasi & Setup WhatsApp Gateway (Internal) (Sekali bayar)',
     satuan: 'Paket',
-    unitPrice: 1500000,
+    unitPrice: 9500000,
     isDppNilaiLain: true,
-    isObjekPph23: true
+    dppNilaiLainCustom: 8708333,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: true,
+    pph23Rate: 2
+  },
+  {
+    sku: 'SRV-PAYROLL-01',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Pengembangan Sistem SIM Payroll Terintegrasi (Sekali bayar)',
+    satuan: 'Paket',
+    unitPrice: 60000000,
+    isDppNilaiLain: true,
+    dppNilaiLainCustom: 55000000,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: true,
+    pph23Rate: 2
+  },
+  {
+    sku: 'SRV-PAYROLL-001',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Jasa Pembuatan Aplikasi Sistem Informasi Manajemen Payroll',
+    satuan: 'Paket',
+    unitPrice: 75000000,
+    isDppNilaiLain: true,
+    dppNilaiLainCustom: 68750000,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: true,
+    pph23Rate: 2
+  },
+  {
+    sku: 'SRV-POS-APP',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Jasa Pengembangan & Integrasi Software Kasir POS Barcode Cloud',
+    satuan: 'Paket',
+    unitPrice: 35000000,
+    isDppNilaiLain: true,
+    dppNilaiLainCustom: 32083333,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: true,
+    pph23Rate: 2
+  },
+  {
+    sku: 'SRV-INSTALASI-001',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Jasa Instalasi, Setting Hardware Barcode Scanner & Printer Kasir',
+    satuan: 'Paket',
+    unitPrice: 3500000,
+    isDppNilaiLain: false,
+    dppNilaiLainCustom: null,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: true,
+    pph23Rate: 2
+  },
+  {
+    sku: 'SRV-MNT-KONTRAK',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Jasa Pemeliharaan & Troubleshooting Sistem Kasir (Maintenance Kontrak)',
+    satuan: 'Bulan',
+    unitPrice: 5000000,
+    isDppNilaiLain: false,
+    dppNilaiLainCustom: null,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: true,
+    pph23Rate: 2
+  },
+  // Hardware & Perlengkapan Barcode (BKP)
+  {
+    sku: 'BAR-SCN-001',
+    tipe: 'Barang',
+    kategori: 'Hardware',
+    kodeCoretax: '45281001 - Scanner Optik',
+    name: 'Barcode Scanner 2D Honeywell Voyager 1400g (USB Auto-Sense)',
+    satuan: 'Unit',
+    unitPrice: 1250000,
+    isDppNilaiLain: false,
+    dppNilaiLainCustom: null,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: false
   },
   {
     sku: 'BCS-2D-HW1',
@@ -153,6 +279,23 @@ const DEFAULT_STATIC_PRODUCTS = [
     satuan: 'Unit',
     unitPrice: 1850000,
     isDppNilaiLain: true,
+    dppNilaiLainCustom: null,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: false
+  },
+  {
+    sku: 'BAR-PRN-001',
+    tipe: 'Barang',
+    kategori: 'Hardware',
+    kodeCoretax: '45262002 - Printer Label',
+    name: 'Printer Barcode Thermal Transfer TSC TTP-244 Pro',
+    satuan: 'Unit',
+    unitPrice: 3200000,
+    isDppNilaiLain: false,
+    dppNilaiLainCustom: null,
+    ppnRate: 12,
+    ppnBmRate: 0,
     isObjekPph23: false
   },
   {
@@ -164,6 +307,51 @@ const DEFAULT_STATIC_PRODUCTS = [
     satuan: 'Unit',
     unitPrice: 3200000,
     isDppNilaiLain: true,
+    dppNilaiLainCustom: null,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: false
+  },
+  {
+    sku: 'POS-PRN-001',
+    tipe: 'Barang',
+    kategori: 'Hardware',
+    kodeCoretax: '45262001 - Printer Kasir',
+    name: 'Printer Kasir Thermal 80mm Epson TM-T82X (Auto-Cutter)',
+    satuan: 'Unit',
+    unitPrice: 1950000,
+    isDppNilaiLain: false,
+    dppNilaiLainCustom: null,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: false
+  },
+  {
+    sku: 'CSM-RBN-001',
+    tipe: 'Barang',
+    kategori: 'Consumable',
+    kodeCoretax: '38912001 - Pita Ribbon',
+    name: 'Ribbon Barcode Wax 110mm x 300m (Face Out - Core 1 Inch)',
+    satuan: 'Roll',
+    unitPrice: 65000,
+    isDppNilaiLain: false,
+    dppNilaiLainCustom: null,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: false
+  },
+  {
+    sku: 'CSM-LBL-001',
+    tipe: 'Barang',
+    kategori: 'Consumable',
+    kodeCoretax: '32199002 - Kertas Label',
+    name: 'Label Barcode Semicoat 33mm x 15mm (3 Line Gap - 5000 Pcs)',
+    satuan: 'Roll',
+    unitPrice: 55000,
+    isDppNilaiLain: false,
+    dppNilaiLainCustom: null,
+    ppnRate: 12,
+    ppnBmRate: 0,
     isObjekPph23: false
   }
 ];
@@ -729,21 +917,28 @@ async function loadCustomerMaster() {
     console.log('Customer API offline, fallback to local');
   }
 
-  if (!sampleCustomers || sampleCustomers.length === 0) {
-    const local = localStorage.getItem('IBC_CUSTOMERS');
-    sampleCustomers = local ? JSON.parse(local) : DEFAULT_STATIC_CUSTOMERS;
-  }
+  let localCusts = [];
+  try {
+    const raw = localStorage.getItem('IBC_CUSTOMERS');
+    if (raw) localCusts = JSON.parse(raw);
+  } catch (e) {}
 
-  const select = document.getElementById('quickCustomerSelect');
-  if (select) {
-    select.innerHTML = '<option value="">-- Pilih Rekanan / Customer Coretax --</option>';
-    sampleCustomers.forEach(cust => {
-      const opt = document.createElement('option');
-      opt.value = cust.id;
-      opt.textContent = `[${cust.tipeWp}] ${cust.name}`;
-      select.appendChild(opt);
-    });
-  }
+  const merged = Array.isArray(sampleCustomers) && sampleCustomers.length > 0
+    ? [...sampleCustomers]
+    : (Array.isArray(localCusts) ? [...localCusts] : []);
+
+  DEFAULT_STATIC_CUSTOMERS.forEach(dc => {
+    if (!merged.some(m => m.id === dc.id)) {
+      merged.push(dc);
+    }
+  });
+
+  sampleCustomers = merged;
+  try {
+    localStorage.setItem('IBC_CUSTOMERS', JSON.stringify(sampleCustomers));
+  } catch (e) {}
+
+  refreshCustomerDropdown();
 }
 
 function setupTabs() {
@@ -843,21 +1038,28 @@ async function loadProductCatalog() {
     console.log('Products API offline, fallback to local');
   }
 
-  if (!catalogProducts || catalogProducts.length === 0) {
-    const local = localStorage.getItem('IBC_PRODUCTS');
-    catalogProducts = local ? JSON.parse(local) : DEFAULT_STATIC_PRODUCTS;
-  }
+  let localProds = [];
+  try {
+    const raw = localStorage.getItem('IBC_PRODUCTS');
+    if (raw) localProds = JSON.parse(raw);
+  } catch (e) {}
 
-  const select = document.getElementById('quickCatalogSelect');
-  if (select) {
-    select.innerHTML = '<option value="">-- Tambah Cepat dari Katalog Produk/Jasa --</option>';
-    catalogProducts.forEach(prod => {
-      const opt = document.createElement('option');
-      opt.value = prod.sku;
-      opt.textContent = `[${prod.kategori}] ${prod.name} (${formatRupiah(prod.unitPrice)})`;
-      select.appendChild(opt);
-    });
-  }
+  const merged = Array.isArray(catalogProducts) && catalogProducts.length > 0
+    ? [...catalogProducts]
+    : (Array.isArray(localProds) ? [...localProds] : []);
+
+  DEFAULT_STATIC_PRODUCTS.forEach(dp => {
+    if (!merged.some(m => m.sku === dp.sku)) {
+      merged.push(dp);
+    }
+  });
+
+  catalogProducts = merged;
+  try {
+    localStorage.setItem('IBC_PRODUCTS', JSON.stringify(catalogProducts));
+  } catch (e) {}
+
+  refreshProductDropdown();
 }
 
 let sellerProfileData = null;
@@ -1384,7 +1586,7 @@ function addItemRow(prod = null) {
 
   const defaultSku = prod ? prod.sku : `SKU-${String(rowCount).padStart(3, '0')}`;
   const defaultName = prod ? prod.name : '';
-  const defaultKategori = prod ? prod.kategori : 'Hardware';
+  const defaultKategori = prod ? (prod.tipe || prod.kategori || 'Hardware') : 'Hardware';
   const defaultPrice = prod ? prod.unitPrice : 0;
 
   tr.innerHTML = `
@@ -2175,13 +2377,34 @@ async function saveCustomerMaster() {
 
 function refreshCustomerDropdown() {
   const select = document.getElementById('quickCustomerSelect');
-  select.innerHTML = '<option value="">-- Pilih Lawan Transaksi Coretax --</option>';
-  sampleCustomers.forEach(cust => {
+  if (!select) return;
+  select.innerHTML = '<option value="">-- Pilih Rekanan / Customer Coretax --</option>';
+
+  const retailGroup = document.createElement('optgroup');
+  retailGroup.label = '🛒 RETAIL & PELANGGAN UMUM (NON-PAJAK)';
+
+  const badanGroup = document.createElement('optgroup');
+  badanGroup.label = '🏢 BADAN USAHA / PT / CV (FAKTUR PAJAK)';
+
+  const peroranganGroup = document.createElement('optgroup');
+  peroranganGroup.label = '👤 ORANG PRIBADI / TOKO';
+
+  (sampleCustomers || []).forEach(cust => {
     const opt = document.createElement('option');
     opt.value = cust.id;
     opt.textContent = `[${cust.tipeWp}] ${cust.name}`;
-    select.appendChild(opt);
+    if (cust.isNonPajak || cust.id === 'CUST-RETAIL-01') {
+      retailGroup.appendChild(opt);
+    } else if (cust.tipeWp === 'BADAN') {
+      badanGroup.appendChild(opt);
+    } else {
+      peroranganGroup.appendChild(opt);
+    }
   });
+
+  if (retailGroup.children.length > 0) select.appendChild(retailGroup);
+  if (badanGroup.children.length > 0) select.appendChild(badanGroup);
+  if (peroranganGroup.children.length > 0) select.appendChild(peroranganGroup);
 }
 
 // ==========================================
@@ -2350,13 +2573,29 @@ async function saveProductMaster() {
 
 function refreshProductDropdown() {
   const select = document.getElementById('quickCatalogSelect');
-  select.innerHTML = '<option value="">-- Pilih Produk CV. Istana Barcode --</option>';
-  catalogProducts.forEach(prod => {
+  if (!select) return;
+  select.innerHTML = '<option value="">-- Tambah Cepat dari Katalog Produk/Jasa (Klik untuk Memilih) --</option>';
+
+  const jasaGroup = document.createElement('optgroup');
+  jasaGroup.label = '💼 JASA & SOFTWARE (IT SOLUTION)';
+
+  const barangGroup = document.createElement('optgroup');
+  barangGroup.label = '📦 HARDWARE & PERLENGKAPAN BARCODE';
+
+  (catalogProducts || []).forEach(prod => {
     const opt = document.createElement('option');
     opt.value = prod.sku;
-    opt.textContent = `[${prod.tipe || prod.kategori}] ${prod.name} (${formatRupiah(prod.unitPrice)})`;
-    select.appendChild(opt);
+    const isJasa = (prod.tipe === 'Jasa' || prod.kategori === 'Jasa');
+    opt.textContent = `${prod.name} (${formatRupiah(prod.unitPrice)})`;
+    if (isJasa) {
+      jasaGroup.appendChild(opt);
+    } else {
+      barangGroup.appendChild(opt);
+    }
   });
+
+  if (jasaGroup.children.length > 0) select.appendChild(jasaGroup);
+  if (barangGroup.children.length > 0) select.appendChild(barangGroup);
 }
 
 async function saveSellerSettingsHandler() {

@@ -177,5 +177,33 @@
     "ppnRate": 12,
     "ppnBmRate": 0,
     "isObjekPph23": false
+  },
+  {
+    "sku": "BCS-2D-HW1",
+    "tipe": "Barang",
+    "kategori": "Hardware",
+    "kodeCoretax": "45281001 - Barcode Scanner 1D/2D",
+    "name": "Honeywell HF680 2D Omnidirectional Presentation Barcode Scanner",
+    "satuan": "Unit",
+    "unitPrice": 1850000,
+    "isDppNilaiLain": true,
+    "dppNilaiLainCustom": null,
+    "ppnRate": 12,
+    "ppnBmRate": 0,
+    "isObjekPph23": false
+  },
+  {
+    "sku": "PRT-LBL-TSC",
+    "tipe": "Barang",
+    "kategori": "Hardware",
+    "kodeCoretax": "45262002 - Printer Label Barcode",
+    "name": "TSC TE200 Barcode Label Printer USB Direct Thermal & Thermal Transfer",
+    "satuan": "Unit",
+    "unitPrice": 3200000,
+    "isDppNilaiLain": true,
+    "dppNilaiLainCustom": null,
+    "ppnRate": 12,
+    "ppnBmRate": 0,
+    "isObjekPph23": false
   }
 ]
