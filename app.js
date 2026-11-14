@@ -1021,8 +1021,11 @@ function setupInitialSampleData() {
     unitPrice: 1500000
   });
 
-  // Isi custom DPP Nilai Lain Rp 68.750.000
-  document.getElementById('customDppNilaiLain').value = '68750000';
+  // Reset DPP Nilai Lain ke mode Otomatis (11/12)
+  if (document.getElementById('dppModeAuto')) document.getElementById('dppModeAuto').checked = true;
+  if (document.getElementById('customDppNilaiLain')) document.getElementById('customDppNilaiLain').value = '';
+  if (document.getElementById('boxManualDppLain')) document.getElementById('boxManualDppLain').style.display = 'none';
+  if (document.getElementById('dppAutoInfoBox')) document.getElementById('dppAutoInfoBox').style.display = 'block';
 }
 
 async function loadProductCatalog() {
@@ -1250,7 +1253,7 @@ function setupEventListeners() {
 
   // Opsi DPP Nilai Lain & PPh 23
   document.getElementById('chkDppNilaiLain').addEventListener('change', (e) => {
-    document.getElementById('boxCustomDppLain').style.display = e.target.checked ? 'flex' : 'none';
+    document.getElementById('boxCustomDppLain').style.display = e.target.checked ? 'block' : 'none';
     if (e.target.checked) {
       document.getElementById('kodeTransaksi').value = '04';
     } else {
@@ -1259,7 +1262,51 @@ function setupEventListeners() {
     triggerRecalculate();
   });
 
-  document.getElementById('customDppNilaiLain').addEventListener('input', triggerRecalculate);
+  const dppModeAutoRadio = document.getElementById('dppModeAuto');
+  const dppModeManualRadio = document.getElementById('dppModeManual');
+  const boxManualDpp = document.getElementById('boxManualDppLain');
+  const dppAutoInfoBox = document.getElementById('dppAutoInfoBox');
+  const customDppInput = document.getElementById('customDppNilaiLain');
+  const btnResetDppAuto = document.getElementById('btnResetDppAuto');
+
+  if (dppModeAutoRadio) {
+    dppModeAutoRadio.addEventListener('change', () => {
+      if (dppModeAutoRadio.checked) {
+        if (boxManualDpp) boxManualDpp.style.display = 'none';
+        if (dppAutoInfoBox) dppAutoInfoBox.style.display = 'block';
+        if (customDppInput) customDppInput.value = '';
+        triggerRecalculate();
+      }
+    });
+  }
+
+  if (dppModeManualRadio) {
+    dppModeManualRadio.addEventListener('change', () => {
+      if (dppModeManualRadio.checked) {
+        if (boxManualDpp) boxManualDpp.style.display = 'block';
+        if (dppAutoInfoBox) dppAutoInfoBox.style.display = 'none';
+        if (customDppInput && !customDppInput.value && currentTaxCalculation?.summary?.dppNilaiLain) {
+          customDppInput.value = currentTaxCalculation.summary.dppNilaiLain;
+        }
+        if (customDppInput) customDppInput.focus();
+        triggerRecalculate();
+      }
+    });
+  }
+
+  if (btnResetDppAuto) {
+    btnResetDppAuto.addEventListener('click', () => {
+      if (dppModeAutoRadio) dppModeAutoRadio.checked = true;
+      if (boxManualDpp) boxManualDpp.style.display = 'none';
+      if (dppAutoInfoBox) dppAutoInfoBox.style.display = 'block';
+      if (customDppInput) customDppInput.value = '';
+      triggerRecalculate();
+    });
+  }
+
+  if (customDppInput) {
+    customDppInput.addEventListener('input', triggerRecalculate);
+  }
 
   document.getElementById('chkPph23').addEventListener('change', (e) => {
     document.getElementById('boxPph23Rate').style.display = e.target.checked ? 'flex' : 'none';
@@ -1271,7 +1318,7 @@ function setupEventListeners() {
   document.getElementById('kodeTransaksi').addEventListener('change', (e) => {
     if (e.target.value === '04') {
       document.getElementById('chkDppNilaiLain').checked = true;
-      document.getElementById('boxCustomDppLain').style.display = 'flex';
+      document.getElementById('boxCustomDppLain').style.display = 'block';
     }
     triggerRecalculate();
   });
@@ -1566,8 +1613,7 @@ function saveTransactionFromModal() {
 
   if (isDppLain) {
     document.getElementById('chkDppNilaiLain').checked = true;
-    document.getElementById('customDppNilaiLain').value = String(dppLain);
-    document.getElementById('boxCustomDppLain').style.display = 'flex';
+    document.getElementById('boxCustomDppLain').style.display = 'block';
     document.getElementById('kodeTransaksi').value = '04';
   }
 
@@ -1666,7 +1712,18 @@ async function triggerRecalculate() {
   const ppnRate = Number(document.getElementById('ppnRate').value || 12);
   const kodeTransaksi = document.getElementById('kodeTransaksi').value;
   const useDppNilaiLain = document.getElementById('chkDppNilaiLain').checked;
-  const customDppNilaiLain = document.getElementById('customDppNilaiLain').value;
+
+  // Cek apakah mode Otomatis (11/12) atau Kustom
+  const isDppAuto = document.getElementById('dppModeAuto') ? document.getElementById('dppModeAuto').checked : true;
+  let customDppNilaiLain = null;
+
+  if (useDppNilaiLain && !isDppAuto) {
+    const rawVal = document.getElementById('customDppNilaiLain')?.value;
+    if (rawVal && Number(rawVal) > 0) {
+      customDppNilaiLain = Number(rawVal);
+    }
+  }
+
   const hasPph23 = document.getElementById('chkPph23').checked;
   const pph23Rate = Number(document.getElementById('pph23Rate').value || 2);
 
@@ -1675,7 +1732,7 @@ async function triggerRecalculate() {
     ppnRate: isNonPajak ? 0 : ppnRate,
     kodeTransaksi: isNonPajak ? '00' : kodeTransaksi,
     useDppNilaiLain: isNonPajak ? false : useDppNilaiLain,
-    customDppNilaiLain: isNonPajak ? null : (customDppNilaiLain ? Number(customDppNilaiLain) : null),
+    customDppNilaiLain: isNonPajak ? null : customDppNilaiLain,
     hasPph23: isNonPajak ? false : hasPph23,
     pph23Rate: isNonPajak ? 0 : pph23Rate
   };
@@ -1718,6 +1775,18 @@ function renderTaxSummary(calc) {
   const { summary, useDppNilaiLain, ppnRate, hasPph23, pph23Rate, isNonPajak } = calc;
 
   document.getElementById('summarySubtotalDpp').textContent = formatRupiah(summary.subtotalDpp);
+
+  // Update Tampilan Otomatis DPP Nilai Lain Live
+  const autoDppVal = summary.dppNilaiLain || Math.round((summary.subtotalDpp || 0) * (11 / 12));
+  const dppAutoRes = document.getElementById('dppAutoResultDisplay');
+  if (dppAutoRes) {
+    dppAutoRes.textContent = formatRupiah(autoDppVal);
+  }
+  const dppAutoDetail = document.getElementById('dppAutoFormulaDetail');
+  if (dppAutoDetail) {
+    const estPpn = Math.round(autoDppVal * (ppnRate / 100));
+    dppAutoDetail.textContent = `11/12 × ${formatRupiah(summary.subtotalDpp)} = ${formatRupiah(autoDppVal)} (Dasar PPN 12%: ${formatRupiah(estPpn)})`;
+  }
 
   const lineDppLain = document.getElementById('lineDppNilaiLain');
   const labelPpn = document.getElementById('labelPpnText');
@@ -1780,7 +1849,16 @@ async function saveCurrentInvoice() {
   const ppnRate = Number(document.getElementById('ppnRate').value || 12);
   const kodeTransaksi = document.getElementById('kodeTransaksi').value;
   const useDppNilaiLain = document.getElementById('chkDppNilaiLain').checked;
-  const customDppNilaiLain = document.getElementById('customDppNilaiLain').value;
+
+  const isDppAuto = document.getElementById('dppModeAuto') ? document.getElementById('dppModeAuto').checked : true;
+  let customDppNilaiLain = null;
+  if (useDppNilaiLain && !isDppAuto) {
+    const rawCustom = document.getElementById('customDppNilaiLain')?.value;
+    if (rawCustom && Number(rawCustom) > 0) {
+      customDppNilaiLain = Number(rawCustom);
+    }
+  }
+
   const hasPph23 = document.getElementById('chkPph23').checked;
   const pph23Rate = Number(document.getElementById('pph23Rate').value || 2);
 

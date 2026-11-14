@@ -133,17 +133,47 @@
                     <div class="checkbox-row mt-1">
                       <label class="checkbox-label">
                         <input type="checkbox" id="chkDppNilaiLain" checked>
-                        <span>Gunakan DPP Nilai Lain</span>
+                        <span><strong>Gunakan DPP Nilai Lain</strong></span>
                       </label>
                     </div>
                   </div>
                 </div>
 
-                <div class="form-row mt-2" id="boxCustomDppLain">
-                  <div class="form-group flex-1">
-                    <label for="customDppNilaiLain">Nominal DPP Nilai Lain (Opsional/Custom)</label>
-                    <input type="number" id="customDppNilaiLain" placeholder="Kosongkan jika auto proporsi 11/12" class="input-mono">
-                    <small class="helper-text">Jika kosong, sistem otomatis menghitung <code>Subtotal × 11/12</code></small>
+                <!-- Kartu Perhitungan DPP Nilai Lain (Otomatis vs Kustom) -->
+                <div class="dpp-lain-card mt-2" id="boxCustomDppLain">
+                  <div class="dpp-lain-header">
+                    <div class="dpp-lain-title">
+                      <span>⚡</span> <strong>Perhitungan DPP Nilai Lain</strong>
+                    </div>
+                    <div class="dpp-mode-toggles">
+                      <label class="dpp-mode-radio">
+                        <input type="radio" name="dppLainMode" id="dppModeAuto" value="AUTO" checked>
+                        <span>Otomatis (11/12)</span>
+                      </label>
+                      <label class="dpp-mode-radio">
+                        <input type="radio" name="dppLainMode" id="dppModeManual" value="MANUAL">
+                        <span>Kustom / Manual</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <!-- Tampilan Hasil Otomatis Real-time -->
+                  <div id="dppAutoInfoBox" class="dpp-auto-badge">
+                    <div class="dpp-auto-calc-line">
+                      <span>Rumus: <strong>Subtotal × 11/12</strong></span>
+                      <span class="dpp-auto-val" id="dppAutoResultDisplay">Rp 0,00</span>
+                    </div>
+                    <small id="dppAutoFormulaDetail" class="text-muted">Otomatis dihitung langsung dari total belanja barang & jasa</small>
+                  </div>
+
+                  <!-- Input Manual (tampil saat mode Kustom / Manual dipilih) -->
+                  <div class="form-group mt-2" id="boxManualDppLain" style="display: none;">
+                    <label for="customDppNilaiLain" style="font-size: 12px; color: #334155;">Nominal DPP Nilai Lain Kustom (Rp):</label>
+                    <div class="input-with-button">
+                      <input type="number" id="customDppNilaiLain" placeholder="Masukkan angka kustom..." class="input-mono">
+                      <button type="button" class="btn btn-sm btn-secondary" id="btnResetDppAuto" title="Kembalikan ke Otomatis 11/12">Kembali ke Otomatis (11/12)</button>
+                    </div>
+                    <small class="helper-text text-muted">Gunakan opsi ini hanya jika ada nominal DPP khusus yang disepakati.</small>
                   </div>
                 </div>
 
