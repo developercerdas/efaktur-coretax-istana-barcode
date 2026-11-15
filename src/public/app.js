@@ -158,8 +158,26 @@ const DEFAULT_STATIC_PRODUCTS = [
     name: 'Sewa Cloud Server & Setup Domain (Dibayar per bulan)',
     satuan: 'Bulan',
     unitPrice: 4000000,
+    defaultCycle: 'Bulanan',
+    defaultCycle: 'Bulanan',
     isDppNilaiLain: true,
     dppNilaiLainCustom: 3666667,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: true,
+    pph23Rate: 2
+  },
+  {
+    sku: 'SRV-CLOUD-YR',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Sewa Cloud Server & Setup Domain (Paket Tahunan - 12 Bulan)',
+    satuan: 'Tahun',
+    unitPrice: 45000000,
+    defaultCycle: 'Tahunan',
+    isDppNilaiLain: true,
+    dppNilaiLainCustom: 41250000,
     ppnRate: 12,
     ppnBmRate: 0,
     isObjekPph23: true,
@@ -245,9 +263,26 @@ const DEFAULT_STATIC_PRODUCTS = [
     tipe: 'Jasa',
     kategori: 'Jasa',
     kodeCoretax: '000000 - Jasa',
-    name: 'Jasa Pemeliharaan & Troubleshooting Sistem Kasir (Maintenance Kontrak)',
+    name: 'Jasa Pemeliharaan & Troubleshooting Sistem Kasir (Maintenance Kontrak Bulanan)',
     satuan: 'Bulan',
     unitPrice: 5000000,
+    defaultCycle: 'Bulanan',
+    isDppNilaiLain: false,
+    dppNilaiLainCustom: null,
+    ppnRate: 12,
+    ppnBmRate: 0,
+    isObjekPph23: true,
+    pph23Rate: 2
+  },
+  {
+    sku: 'SRV-MNT-YR',
+    tipe: 'Jasa',
+    kategori: 'Jasa',
+    kodeCoretax: '000000 - Jasa',
+    name: 'Jasa Pemeliharaan & Troubleshooting Sistem Kasir (Maintenance Kontrak Tahunan)',
+    satuan: 'Tahun',
+    unitPrice: 55000000,
+    defaultCycle: 'Tahunan',
     isDppNilaiLain: false,
     dppNilaiLainCustom: null,
     ppnRate: 12,
@@ -371,6 +406,57 @@ function terbilangRupiahClient(nominal) {
   return terbilangRupiahClient(Math.floor(angka / 1000000000000)) + ' Triliun ' + terbilangRupiahClient(angka % 1000000000000);
 }
 
+// Helper Format Tanggal Indonesia (Standar Faktur & Invoice Cloud Hosting)
+function formatTanggalIndo(dateStr) {
+  if (!dateStr) return '';
+  const parts = String(dateStr).split('-');
+  if (parts.length !== 3) return dateStr;
+  const bulanIndo = [
+    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+  ];
+  const tgl = parseInt(parts[2], 10);
+  const bln = parseInt(parts[1], 10) - 1;
+  const thn = parts[0];
+  return `${tgl} ${bulanIndo[bln]} ${thn}`;
+}
+
+// Hitung Otomatis Tanggal Berakhir Sesuai Siklus Tagihan (Bulanan / Tahunan) ala IDCloudHost / WHMCS
+function computePeriodDates(cycle, baseDate = null) {
+  let d = baseDate ? new Date(baseDate) : new Date();
+  if (isNaN(d.getTime())) d = new Date();
+
+  const startYear = d.getFullYear();
+  const startMonth = d.getMonth();
+  const startDay = d.getDate();
+
+  const pad = (n) => String(n).padStart(2, '0');
+  const startStr = `${startYear}-${pad(startMonth + 1)}-${pad(startDay)}`;
+
+  if (cycle === 'Bulanan') {
+    // Siklus 1 Bulan: dari tanggal mulai s/d 1 bulan kedepan dikurangi 1 hari
+    const end = new Date(startYear, startMonth + 1, startDay - 1);
+    const endStr = `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}`;
+    return { start: startStr, end: endStr };
+  } else if (cycle === 'Tahunan') {
+    // Siklus 1 Tahun: dari tanggal mulai s/d 1 tahun kedepan dikurangi 1 hari
+    const end = new Date(startYear + 1, startMonth, startDay - 1);
+    const endStr = `${end.getFullYear()}-${pad(end.getMonth() + 1)}-${pad(end.getDate())}`;
+    return { start: startStr, end: endStr };
+  }
+  return { start: startStr, end: '' };
+}
+
+function getPeriodDisplayText(type, start, end) {
+  if (!start && !end) return '';
+  const cycleLabel = (type && type !== 'Kustom') ? ` (${type})` : '';
+  if (start && end) {
+    return `${formatTanggalIndo(start)} s/d ${formatTanggalIndo(end)}${cycleLabel}`;
+  }
+  if (start) return `Mulai ${formatTanggalIndo(start)}${cycleLabel}`;
+  return `Sampai ${formatTanggalIndo(end)}${cycleLabel}`;
+}
+
 function calculateClientSide(items, options) {
   const isNonPajak = Boolean(options.isNonPajak ?? false);
   const ppnRate = isNonPajak ? 0 : Number(options.ppnRate ?? 12);
@@ -395,6 +481,11 @@ function calculateClientSide(items, options) {
       sku: item.sku || ('ITEM-' + (index + 1)),
       name: item.name || 'Barang/Jasa Barcode',
       kategori: item.kategori || 'Hardware',
+      periodCycle: item.periodCycle || item.periodType || '',
+      periodType: item.periodType || item.periodCycle || '',
+      periodStart: item.periodStart || '',
+      periodEnd: item.periodEnd || '',
+      periodeText: item.periodeText || '',
       qty,
       unitPrice,
       discount,
@@ -484,10 +575,11 @@ function generateClientCoretaxXML(inv) {
   xml += '    </Buyer>\n';
   xml += '    <GoodsServicesList>\n';
   items.forEach((item, idx) => {
+    const itemDesc = (item.name || '') + (item.periodeText ? ' (Masa Aktif: ' + item.periodeText + ')' : '');
     xml += '      <GoodService>\n';
     xml += '        <ItemSequence>' + (item.urutan || (idx + 1)) + '</ItemSequence>\n';
     xml += '        <ItemCode>' + (item.sku || 'SKU') + '</ItemCode>\n';
-    xml += '        <ItemDescription>' + (item.name || '') + '</ItemDescription>\n';
+    xml += '        <ItemDescription>' + itemDesc + '</ItemDescription>\n';
     xml += '        <ItemCategory>' + (item.kategori || 'Jasa') + '</ItemCategory>\n';
     xml += '        <Quantity>' + (item.qty || 1) + '</Quantity>\n';
     xml += '        <UnitPrice>' + (item.unitPrice || 0) + '</UnitPrice>\n';
@@ -1011,7 +1103,8 @@ function setupInitialSampleData() {
     sku: 'SRV-CLOUD-01',
     name: 'Sewa Cloud Server & Setup Domain (Dibayar per bulan)',
     kategori: 'Jasa',
-    unitPrice: 4000000
+    unitPrice: 4000000,
+    defaultCycle: 'Bulanan'
   });
 
   addItemRow({
@@ -1635,6 +1728,20 @@ function addItemRow(prod = null) {
   const defaultKategori = prod ? (prod.tipe || prod.kategori || 'Hardware') : 'Hardware';
   const defaultPrice = prod ? prod.unitPrice : 0;
 
+  // Deteksi layanan berlangganan cloud/server/maintenance (ala IDCloudHost)
+  const isSubscription = prod?.defaultCycle || (prod?.satuan === 'Bulan' || prod?.satuan === 'Tahun') || /cloud|server|hosting|domain|maintenance|sewa|kontrak/i.test(defaultName);
+  const initialCycle = prod?.defaultCycle || (isSubscription ? (prod?.satuan === 'Tahun' ? 'Tahunan' : 'Bulanan') : '');
+
+  let initialStart = prod?.periodStart || '';
+  let initialEnd = prod?.periodEnd || '';
+  if (initialCycle && (!initialStart || !initialEnd)) {
+    const invDateVal = document.getElementById('invoiceDate')?.value || '';
+    const comp = computePeriodDates(initialCycle, invDateVal);
+    initialStart = comp.start;
+    initialEnd = comp.end;
+  }
+  const initialPeriodText = prod?.periodeText || (initialCycle ? getPeriodDisplayText(initialCycle, initialStart, initialEnd) : '');
+
   tr.innerHTML = `
     <td class="text-center row-num">${rowCount}</td>
     <td>
@@ -1643,6 +1750,42 @@ function addItemRow(prod = null) {
     <td>
       <input type="text" class="item-name-input" value="${defaultName}" placeholder="Nama Produk/Jasa">
       <input type="hidden" class="item-kategori-input" value="${defaultKategori}">
+      <input type="hidden" class="item-period-text" value="${initialPeriodText}">
+
+      <!-- Kontrol Periode Masa Aktif Layanan (Bulanan / Tahunan ala IDCloudHost) -->
+      <div class="item-period-container">
+        <div class="period-toggle-row">
+          <button type="button" class="btn-toggle-period ${initialPeriodText ? 'has-period' : ''}">
+            <span>🗓️</span> Masa Aktif: <strong class="period-badge-preview">${initialPeriodText || 'Set Tanggal Aktif'}</strong>
+          </button>
+        </div>
+        <div class="item-period-box" style="${initialPeriodText ? 'display: block;' : 'display: none;'}">
+          <div class="period-inputs-grid">
+            <div class="period-col-cycle">
+              <select class="item-period-cycle">
+                <option value="" ${!initialCycle ? 'selected' : ''}>-- Tanpa Masa Aktif --</option>
+                <option value="Bulanan" ${initialCycle === 'Bulanan' ? 'selected' : ''}>📅 Sewa Bulanan (1 Bulan)</option>
+                <option value="Tahunan" ${initialCycle === 'Tahunan' ? 'selected' : ''}>📆 Sewa Tahunan (1 Tahun)</option>
+                <option value="Kustom" ${initialCycle === 'Kustom' ? 'selected' : ''}>✏️ Kustom Tanggal</option>
+              </select>
+            </div>
+            <div class="period-col-dates">
+              <div class="period-date-group">
+                <label>Mulai:</label>
+                <input type="date" class="item-period-start" value="${initialStart}">
+              </div>
+              <span class="period-sep">s/d</span>
+              <div class="period-date-group">
+                <label>Sampai:</label>
+                <input type="date" class="item-period-end" value="${initialEnd}">
+              </div>
+            </div>
+          </div>
+          <div class="period-status-info text-muted">
+            ${initialPeriodText ? `✨ Tertera di invoice: <strong>${initialPeriodText}</strong>` : 'Pilih Bulanan / Tahunan untuk otomatis mengisi tanggal'}
+          </div>
+        </div>
+      </div>
     </td>
     <td>
       <input type="number" class="item-qty-input" value="1" min="1" style="width: 70px;">
@@ -1663,7 +1806,71 @@ function addItemRow(prod = null) {
 
   tbody.appendChild(tr);
 
-  tr.querySelectorAll('input').forEach(inp => {
+  // Setup Event Listeners untuk Periode Aktif
+  const btnTogglePeriod = tr.querySelector('.btn-toggle-period');
+  const periodBox = tr.querySelector('.item-period-box');
+  const cycleSelect = tr.querySelector('.item-period-cycle');
+  const startDateInput = tr.querySelector('.item-period-start');
+  const endDateInput = tr.querySelector('.item-period-end');
+  const periodTextInput = tr.querySelector('.item-period-text');
+  const badgePreview = tr.querySelector('.period-badge-preview');
+  const statusInfo = tr.querySelector('.period-status-info');
+
+  const updatePeriodState = () => {
+    const cycle = cycleSelect.value;
+    const sDate = startDateInput.value;
+    const eDate = endDateInput.value;
+    const text = getPeriodDisplayText(cycle, sDate, eDate);
+
+    periodTextInput.value = text;
+    if (text) {
+      badgePreview.textContent = text;
+      btnTogglePeriod.classList.add('has-period');
+      statusInfo.innerHTML = `✨ Tertera di invoice: <strong>${text}</strong>`;
+    } else {
+      badgePreview.textContent = 'Set Tanggal Aktif';
+      btnTogglePeriod.classList.remove('has-period');
+      statusInfo.textContent = 'Pilih Bulanan / Tahunan untuk otomatis mengisi tanggal';
+    }
+    triggerRecalculate();
+  };
+
+  btnTogglePeriod.addEventListener('click', () => {
+    const isOpen = periodBox.style.display !== 'none';
+    periodBox.style.display = isOpen ? 'none' : 'block';
+  });
+
+  cycleSelect.addEventListener('change', () => {
+    const cycle = cycleSelect.value;
+    if (cycle === 'Bulanan' || cycle === 'Tahunan') {
+      const invDateVal = document.getElementById('invoiceDate')?.value || '';
+      const dates = computePeriodDates(cycle, startDateInput.value || invDateVal);
+      startDateInput.value = dates.start;
+      endDateInput.value = dates.end;
+    } else if (!cycle) {
+      startDateInput.value = '';
+      endDateInput.value = '';
+    }
+    updatePeriodState();
+  });
+
+  startDateInput.addEventListener('change', () => {
+    const cycle = cycleSelect.value;
+    if (cycle === 'Bulanan' || cycle === 'Tahunan') {
+      const dates = computePeriodDates(cycle, startDateInput.value);
+      endDateInput.value = dates.end;
+    }
+    updatePeriodState();
+  });
+
+  endDateInput.addEventListener('change', () => {
+    if (cycleSelect.value === 'Bulanan' || cycleSelect.value === 'Tahunan') {
+      cycleSelect.value = 'Kustom';
+    }
+    updatePeriodState();
+  });
+
+  tr.querySelectorAll('input:not([type="date"])').forEach(inp => {
     inp.addEventListener('input', triggerRecalculate);
   });
 
@@ -1696,11 +1903,26 @@ function getItemsFromTable() {
     const sku = row.querySelector('.item-sku-input').value.trim();
     const name = row.querySelector('.item-name-input').value.trim();
     const kategori = row.querySelector('.item-kategori-input').value || 'Hardware';
+    const periodCycle = row.querySelector('.item-period-cycle')?.value || '';
+    const periodStart = row.querySelector('.item-period-start')?.value || '';
+    const periodEnd = row.querySelector('.item-period-end')?.value || '';
+    const periodeText = row.querySelector('.item-period-text')?.value || getPeriodDisplayText(periodCycle, periodStart, periodEnd);
     const qty = Number(row.querySelector('.item-qty-input').value || 1);
     const unitPrice = Number(row.querySelector('.item-price-input').value || 0);
     const discount = Number(row.querySelector('.item-disc-input').value || 0);
 
-    items.push({ sku, name, kategori, qty, unitPrice, discount });
+    items.push({
+      sku,
+      name,
+      kategori,
+      periodCycle,
+      periodStart,
+      periodEnd,
+      periodeText,
+      qty,
+      unitPrice,
+      discount
+    });
   });
 
   return items;
@@ -2196,7 +2418,10 @@ function openPrintModal() {
     tr.innerHTML = `
       <td class="text-center">${item.urutan}</td>
       <td><strong class="input-mono">${item.sku}</strong></td>
-      <td><strong>${item.name}</strong></td>
+      <td>
+        <strong>${item.name}</strong>
+        ${item.periodeText ? `<div class="print-item-period">🗓️ Masa Aktif: <strong>${item.periodeText}</strong></div>` : ''}
+      </td>
       <td class="text-center">${item.qty}</td>
       <td class="text-right input-mono">${formatRupiah(item.unitPrice)}</td>
       <td class="text-right input-mono"><strong>${formatRupiah(item.total)}</strong></td>

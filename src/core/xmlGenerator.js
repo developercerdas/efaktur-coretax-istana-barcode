@@ -60,10 +60,11 @@ function generateCoretaxXML(invoiceData) {
       .ele('GoodsServicesList');
 
   taxCalculation.items.forEach((item) => {
+    const itemDesc = item.name + (item.periodeText ? ` (Masa Aktif: ${item.periodeText})` : '');
     doc.ele('GoodService')
       .ele('ItemSequence').txt(String(item.urutan)).up()
       .ele('ItemCode').txt(item.sku).up()
-      .ele('ItemDescription').txt(item.name).up()
+      .ele('ItemDescription').txt(itemDesc).up()
       .ele('ItemCategory').txt(item.kategori).up()
       .ele('Quantity').txt(String(item.qty)).up()
       .ele('UnitPrice').txt(String(item.unitPrice)).up()

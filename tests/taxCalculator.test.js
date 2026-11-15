@@ -93,3 +93,32 @@ test('Normalisasi NITKU 22 Digit Coretax', () => {
   const nitkuDefault = normalizeNITKU('', npwp16);
   assert.equal(nitkuDefault, '0123456789012345000000');
 });
+
+test('Periode Layanan Sewa Cloud Server (Bulanan & Tahunan) pada Item', () => {
+  const items = [
+    {
+      sku: 'SRV-CLOUD-01',
+      name: 'Sewa Cloud Server & Setup Domain',
+      kategori: 'Jasa',
+      periodCycle: 'Bulanan',
+      periodStart: '2026-11-01',
+      periodEnd: '2026-11-30',
+      periodeText: '01 November 2026 s/d 30 November 2026 (Bulanan)',
+      qty: 1,
+      unitPrice: 4000000,
+      discount: 0
+    }
+  ];
+
+  const result = calculateInvoice(items, {
+    ppnRate: 12,
+    kodeTransaksi: '04',
+    useDppNilaiLain: true,
+    hasPph23: true,
+    pph23Rate: 2
+  });
+
+  assert.equal(result.items[0].periodCycle, 'Bulanan');
+  assert.equal(result.items[0].periodeText, '01 November 2026 s/d 30 November 2026 (Bulanan)');
+  assert.equal(result.summary.subtotalDpp, 4000000);
+});
